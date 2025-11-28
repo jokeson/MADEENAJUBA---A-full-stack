@@ -173,7 +173,7 @@ export async function getUserById(userId: string): Promise<AuthResult> {
 export async function signUpWithRole(
   email: string,
   password: string,
-  role: "user" | "admin" | "journalist" | "employer" | "finance" = "user"
+  role: "user" | "admin" | "journalist" | "employee" | "finance" = "user"
 ): Promise<AuthResult> {
   try {
     // Validate email

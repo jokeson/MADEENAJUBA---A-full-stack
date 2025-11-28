@@ -918,7 +918,7 @@ const CreateEventPage = () => {
             ? "Delete"
             : "Deposit"
         }
-        confirmColor={
+        confirmButtonColor={
           confirmModal.type === "stop" 
             ? "yellow" 
             : confirmModal.type === "delete" || confirmModal.type === "deleteTicket"

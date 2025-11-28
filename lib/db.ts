@@ -1,4 +1,4 @@
-import { MongoClient, Db, MongoClientOptions } from "mongodb";
+import { MongoClient, Db, MongoClientOptions, Document, Collection } from "mongodb";
 
 // Get MongoDB URI from environment variables
 const rawUri = process.env.MONGODB_URI;
@@ -71,7 +71,7 @@ export const getDb = async (): Promise<Db> => {
 };
 
 // Helper function to get a collection
-export const getCollection = async <T = any>(collectionName: string) => {
+export const getCollection = async <T extends Document = Document>(collectionName: string): Promise<Collection<T>> => {
   const db = await getDb();
   return db.collection<T>(collectionName);
 };

@@ -36,7 +36,7 @@ const generateReferenceNumber = (): string => {
 
 // Helper function to get MongoDB user ID from localStorage user ID or email
 // This bridges the gap between localStorage auth and MongoDB
-const getMongoUserId = async (localStorageUserId: string, email?: string): Promise<ObjectId | null> => {
+export const getMongoUserId = async (localStorageUserId: string, email?: string): Promise<ObjectId | null> => {
   try {
     // If userId is already a valid ObjectId, try to use it directly
     if (ObjectId.isValid(localStorageUserId)) {

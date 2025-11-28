@@ -590,7 +590,7 @@ export async function getAllKycApplications() {
         submittedAt: kyc.submittedAt instanceof Date ? kyc.submittedAt.toISOString() : kyc.submittedAt,
         reviewedAt: kyc.reviewedAt instanceof Date ? kyc.reviewedAt.toISOString() : kyc.reviewedAt,
         rejectionReason: kyc.rejectionReason,
-        documents: kyc.documents.map((doc) => ({
+        documents: kyc.documents.map((doc: any) => ({
           type: doc.type,
           url: doc.url,
           uploadedAt: doc.uploadedAt instanceof Date ? doc.uploadedAt.toISOString() : doc.uploadedAt,

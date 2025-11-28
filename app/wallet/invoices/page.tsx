@@ -54,9 +54,18 @@ const InvoicesPage = () => {
         setError("");
         const result = await getUserInvoices(user.id, user.email);
         if (result.success) {
+          const filterValidInvoices = (invoices: any[]): Invoice[] => {
+            return invoices
+              .filter((inv) => inv._id && inv.ref)
+              .map((inv) => ({
+                ...inv,
+                _id: inv._id as string,
+                ref: inv.ref as string,
+              }));
+          };
           setInvoices({
-            issued: result.issued || [],
-            received: result.received || [],
+            issued: filterValidInvoices(result.issued || []),
+            received: filterValidInvoices(result.received || []),
           });
         } else {
           setError(result.error || "Failed to load invoices");
@@ -86,9 +95,18 @@ const InvoicesPage = () => {
         // Refresh invoices
         const refreshResult = await getUserInvoices(user.id, user.email);
         if (refreshResult.success) {
+          const filterValidInvoices = (invoices: any[]): Invoice[] => {
+            return invoices
+              .filter((inv) => inv._id && inv.ref)
+              .map((inv) => ({
+                ...inv,
+                _id: inv._id as string,
+                ref: inv.ref as string,
+              }));
+          };
           setInvoices({
-            issued: refreshResult.issued || [],
-            received: refreshResult.received || [],
+            issued: filterValidInvoices(refreshResult.issued || []),
+            received: filterValidInvoices(refreshResult.received || []),
           });
         }
       } else {

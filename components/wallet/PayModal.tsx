@@ -438,7 +438,6 @@ const PayModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: PayModalPro
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

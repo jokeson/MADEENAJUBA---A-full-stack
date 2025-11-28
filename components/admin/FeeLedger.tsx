@@ -73,7 +73,11 @@ const FeeLedger = () => {
           setDepositLoading(true);
           setError("");
           const depositedFees = await getDepositedTicketFees();
-          setDepositedTicketFees(depositedFees);
+          // Filter out fees without depositedAt (shouldn't happen for deposited fees, but type safety)
+          const validDepositedFees = depositedFees.filter((fee): fee is DepositedTicketFee => 
+            fee.depositedAt !== undefined
+          );
+          setDepositedTicketFees(validDepositedFees);
           setCurrentPageDeposit(1); // Reset to first page when loading new data
         } catch (err) {
           console.error("Error loading deposited ticket fees:", err);

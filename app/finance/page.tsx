@@ -148,12 +148,12 @@ const FinancePage = () => {
       </div>
 
       {/* Finance Payout Modal */}
-      {user._id && (
+      {user.id && (
         <FinancePayoutModal
           isOpen={isPayModalOpen}
           onClose={() => setIsPayModalOpen(false)}
           onSuccess={handleSuccess}
-          financeUserId={user._id}
+          financeUserId={user.id}
           userRole={user.role}
         />
       )}

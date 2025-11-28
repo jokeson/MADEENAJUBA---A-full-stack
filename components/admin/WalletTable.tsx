@@ -21,6 +21,7 @@ interface Transaction {
   _id: string;
   type: string;
   amount: number;
+  feeCents?: number;
   fromWalletId?: string;
   toWalletId?: string;
   ref?: string;
@@ -444,7 +445,7 @@ const WalletTable = () => {
                                       </td>
                                       <td className="px-4 py-2 text-sm text-[#800000]">
                                         ${tx.amount.toFixed(2)}
-                                        {tx.feeCents > 0 && (
+                                        {tx.feeCents && tx.feeCents > 0 && (
                                           <span className="text-xs text-[#800000] ml-1">
                                             (fee: ${tx.feeCents.toFixed(2)})
                                           </span>

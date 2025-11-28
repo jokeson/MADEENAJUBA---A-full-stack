@@ -570,7 +570,6 @@ export async function purchaseTicket(
         status: "success",
         meta: {
           eventId: new ObjectId(eventId),
-          purchaseGroupId: purchaseGroupId.toString(),
         },
         createdAt: new Date(),
       };
@@ -587,8 +586,6 @@ export async function purchaseTicket(
         status: "pending", // Will be marked as success when deposited
         meta: {
           eventId: new ObjectId(eventId),
-          pendingDeposit: true,
-          purchaseGroupId: purchaseGroupId.toString(),
         },
         createdAt: new Date(),
       };
@@ -791,8 +788,8 @@ export async function getUserPurchasedTickets(userId: string, email?: string) {
         eventTitle: event?.title || "Unknown Event",
         eventImage: event?.eventImage,
         eventDate: event?.eventDate,
-        eventTime: event?.eventTime,
-        eventLocation: event?.location,
+        eventTime: event?.startTime,
+        eventLocation: undefined,
         quantity: 1, // Each ticket is individual
         totalPaidCents: ticket.totalPaidCents,
         referenceNumber: ticket.referenceNumber || "",
@@ -1106,7 +1103,6 @@ export async function depositTicketSales(eventId: string, userId: string, email?
       status: "success",
       meta: {
         eventId: new ObjectId(eventId),
-        depositType: "ticket_sales",
       },
       createdAt: depositTimestamp,
     };
