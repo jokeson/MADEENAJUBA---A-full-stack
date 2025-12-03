@@ -285,7 +285,7 @@ const WalletPage = () => {
       <div className="flex-1 md:ml-56 lg:ml-56 xl:ml-60">
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-4 xs:py-5 sm:py-6 md:py-8 lg:py-10 xl:py-12">
           {/* Header */}
-          <div className="mb-4 xs:mb-5 sm:mb-6 md:mb-8">
+          <div className="mb-4 xs:mb-5 sm:mb-6 md:mb-8 md:mt-8">
             <h1 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#800000] mb-1 xs:mb-2 break-words">
               Kilimgaroo
             </h1>

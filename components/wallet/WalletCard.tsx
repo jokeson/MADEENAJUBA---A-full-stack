@@ -174,7 +174,7 @@ const WalletCard = ({
               {walletId && (
                 <div className="mt-4 p-2 sm:p-3 bg-red-600/30 rounded-lg">
                   <p className="text-red-100 text-xs font-medium mb-1">Wallet ID</p>
-                  <p className="text-red-50 text-xs sm:text-sm font-mono break-all">{walletId}</p>
+                  <p className="text-red-500 text-xs sm:text-sm font-mono break-all">{walletId}</p>
                 </div>
               )}
             </div>
@@ -209,7 +209,7 @@ const WalletCard = ({
               {walletId && (
                 <div className="mt-4 p-2 sm:p-3 bg-red-600/30 rounded-lg">
                   <p className="text-red-100 text-xs font-medium mb-1">Wallet ID</p>
-                  <p className="text-red-50 text-xs sm:text-sm font-mono break-all">{walletId}</p>
+                  <p className="text-red-50 text-xs sm:text-sm font-mono break-all  rounded-lg p-2">{walletId}</p>
                 </div>
               )}
             </div>

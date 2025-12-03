@@ -4,6 +4,7 @@ import { useState } from "react";
 import { processCashPayout, getPendingWithdrawalByRef } from "@/lib/server-actions/wallet";
 import { canHandleFinance } from "@/lib/rbac";
 import { formatDateWithTime } from "@/lib/format";
+import toast from "react-hot-toast";
 
 interface FinancePayoutModalProps {
   isOpen: boolean;
@@ -76,13 +77,16 @@ const FinancePayoutModal = ({
       const result = await processCashPayout(financeUserId, referenceNumber.trim());
 
       if (result.success) {
+        toast.success(result.message || "Cash payout processed successfully!");
         setReferenceNumber("");
         setWithdrawalData(null);
         setShowDetails(false);
         onSuccess();
         onClose();
       } else {
-        setError(result.error || "Failed to process payout");
+        const errorMsg = result.error || "Failed to process payout";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");

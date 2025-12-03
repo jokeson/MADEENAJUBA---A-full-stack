@@ -107,8 +107,8 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-[#f5f5f0] flex">
       <Sidebar />
-      <div className="flex-1 md:ml-56 lg:ml-56 xl:ml-60">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-4 xs:py-5 sm:py-6 md:py-8 lg:py-10 xl:py-12">
+      <div className="flex-1 md:ml-56 lg:ml-56 xl:ml-60  ">
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-4 xs:py-5 sm:py-6 md:py-8 lg:py-10 xl:py-12 md:mt-30">
           <div className="mb-4 xs:mb-5 sm:mb-6 md:mb-8">
             <p className="text-[#800000] text-sm xs:text-base sm:text-lg md:text-xl font-semibold break-words">
               {getWelcomeMessage()}

@@ -128,6 +128,23 @@ const WalletTransactions = ({
   };
 
   /**
+   * Get transaction amount color based on type
+   * Green for deposits/received, Red for withdrawals/sent
+   */
+  const getTransactionAmountColor = (transaction: Transaction): string => {
+    // Red for outgoing transactions (withdrawals, sends, cash payouts)
+    if (
+      transaction.type === "send" ||
+      transaction.type === "request" ||
+      transaction.type === "cash_payout"
+    ) {
+      return "text-red-600";
+    }
+    // Green for incoming transactions (deposits, received)
+    return "text-green-600";
+  };
+
+  /**
    * Get transaction icon based on type
    */
   const getTransactionIcon = (type: string) => {
@@ -341,8 +358,11 @@ const WalletTransactions = ({
                 
                 {/* Transaction Amount and Status */}
                 <div className="text-right flex-shrink-0">
-                  <p className="font-bold text-base sm:text-lg" style={{ color: '#800000' }}>
-                    {transaction.type === "send" || transaction.type === "request" ? "-" : "+"}
+                  <p className={`font-bold text-base sm:text-lg ${getTransactionAmountColor(transaction)}`}>
+                    {transaction.type === "send" || 
+                     transaction.type === "request" || 
+                     transaction.type === "cash_payout"
+                     ? "-" : "+"}
                     SSP {transaction.amount.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

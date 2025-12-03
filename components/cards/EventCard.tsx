@@ -68,133 +68,91 @@ const EventCard = ({
   return (
     <Link
       href={`/events/${id}`}
-      className="group block relative w-full h-[300px] xs:h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] 2xl:h-[600px] rounded-lg sm:rounded-xl overflow-hidden transition-shadow duration-300 bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900"
+      className="group block bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-[#800000]"
       tabIndex={0}
       aria-label={`View event: ${title}`}
     >
-      {/* Full Image Background - Using object-contain to show entire image without cropping */}
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900">
+      {/* Image Section with Title Overlay */}
+      <div className="relative w-full h-48 xs:h-56 sm:h-64 md:h-72 bg-gray-100">
         <Image
           src={displayImage}
           alt={title}
           fill
-          className="object-contain"
+          className="object-cover"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          priority
           onError={() => setImageError(true)}
         />
-      </div>
-      
-      {/* Subtle bottom gradient only for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-      
-      {/* Content Overlay - All text on top of image */}
-      <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-6 md:p-8">
-        {/* Top Section - Badges */}
-        <div className="flex items-start justify-between">
-          {/* Price Badge */}
-          <div>
-            {isPaid && ticketPriceCents ? (
-              <span className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-bold bg-[#800000]/95 text-white shadow-xl backdrop-blur-sm">
-                {formatCurrency(ticketPriceCents / 100)}
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm md:text-base font-bold bg-green-500/95 text-white shadow-xl backdrop-blur-sm">
-                Free
-              </span>
-            )}
-          </div>
-
+        
+        {/* Gradient Overlay for Text Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        
+        {/* Tag Badge - Top Right */}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2 z-10">
           {/* Status Badge */}
-          <div>
-            {isLive ? <LiveNowBadge /> : isUpcoming ? <ComingUpBadge /> : null}
-          </div>
+          {isLive ? (
+            <LiveNowBadge />
+          ) : isUpcoming ? (
+            <ComingUpBadge />
+          ) : null}
+          
+          {/* Price Badge */}
+          {isPaid && ticketPriceCents ? (
+            <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-[#800000] text-white">
+              {formatCurrency(ticketPriceCents / 100)}
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-semibold bg-green-600 text-white">
+              Free
+            </span>
+          )}
         </div>
 
-        {/* Bottom Section - Event Details */}
-        <div className="space-y-3 sm:space-y-4">
-          {/* Title */}
-          <div className="bg-black/80 px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 rounded-lg">
-            <h3 className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-white leading-tight line-clamp-2 group-hover:text-[#800000] transition-colors duration-300 break-words">
+        {/* Title Overlay on Image - Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 xs:p-5 sm:p-6 z-10">
+          <h3 className="text-lg xs:text-xl sm:text-2xl font-bold text-white line-clamp-2 group-hover:text-[#800000] transition-colors break-words drop-shadow-lg">
             {title}
           </h3>
-          </div>
+        </div>
+      </div>
 
-          {/* Details */}
-          {details && (
-            <div className="bg-black/80 px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 sm:py-3 rounded-lg">
-              <p className="text-white/90 text-[10px] xs:text-xs sm:text-sm md:text-base leading-relaxed line-clamp-2 break-words">
-              {details}
-            </p>
-            </div>
-          )}
+      {/* Content Section Below Image */}
+      <div className="p-4 xs:p-5 sm:p-6">
+        {/* Date & Time */}
+        <div className="flex items-center gap-2 text-sm xs:text-base text-gray-600 mb-4 xs:mb-5">
+          <svg
+            className="w-4 h-4 xs:w-5 xs:h-5 text-[#800000] flex-shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          <span className="font-medium">{formatDateTime(startDate)}</span>
+        </div>
 
-          {/* Date & Location Info */}
-          <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
-            {/* Date & Time */}
-            <div className="flex items-center text-white/95 text-xs sm:text-sm md:text-base">
-              <svg
-                className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-[#800000] flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <span className="font-medium truncate">{formatDateTime(startDate)}</span>
-            </div>
-
-            {/* Location */}
-            {location && (
-              <div className="flex items-center text-white/95 text-xs sm:text-sm md:text-base">
-                <svg
-                  className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-[#800000] flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span className="truncate">{location}</span>
-              </div>
-            )}
-          </div>
-
-          {/* View Details CTA */}
-          <div className="pt-3 sm:pt-4 border-t border-white/20">
-            <span className="inline-flex items-center text-sm sm:text-base font-semibold text-[#800000] group-hover:text-white transition-colors duration-300">
-              View Details
-              <svg
-                className="ml-2 w-4 h-4 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </span>
-          </div>
+        {/* View Details Button */}
+        <div className="pt-3 xs:pt-4 border-t border-gray-200">
+          <span className="inline-flex items-center text-sm xs:text-base font-semibold text-[#800000] group-hover:text-[#900000] transition-colors">
+            View Details
+            <svg
+              className="ml-2 w-4 h-4 xs:w-5 xs:h-5 transition-transform group-hover:translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </span>
         </div>
       </div>
     </Link>

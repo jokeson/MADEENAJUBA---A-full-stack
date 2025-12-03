@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { requestCash } from "@/lib/server-actions/wallet";
+import toast from "react-hot-toast";
 
 interface WithdrawModalProps {
   isOpen: boolean;
@@ -45,12 +46,15 @@ const WithdrawModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: Withdr
       const result = await requestCash(userId, amountNum, userEmail);
 
       if (result.success) {
+        toast.success(result.message || `Withdrawal request submitted successfully! Reference: ${result.ref || "N/A"}`);
         setAmount("");
         setStep("form");
         onSuccess();
         onClose();
       } else {
-        setError(result.error || "Failed to request withdrawal");
+        const errorMsg = result.error || "Failed to request withdrawal";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");

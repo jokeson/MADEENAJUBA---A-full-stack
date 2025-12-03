@@ -9,6 +9,7 @@ import { getUserEvents, getUserEventTickets, getUserPurchasedTickets, getUserEve
 import { formatCurrency, formatDateTime } from "@/lib/format";
 import ConfirmationModal from "@/components/ui/ConfirmationModal";
 import TicketDetailsModal from "@/components/tickets/TicketDetailsModal";
+import { getBalance } from "@/lib/server-actions/wallet";
 
 interface UserEvent {
   id: string;
@@ -54,6 +55,8 @@ const CreateEventPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [deletingTicket, setDeletingTicket] = useState<string | null>(null);
+  const [hasWallet, setHasWallet] = useState<boolean | null>(null);
+  const [checkingWallet, setCheckingWallet] = useState(true);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -61,10 +64,39 @@ const CreateEventPage = () => {
     }
   }, [loading, isAuthenticated, router]);
 
+  // Check if user has a wallet
+  useEffect(() => {
+    const checkWallet = async () => {
+      if (!user?.id) {
+        setHasWallet(false);
+        setCheckingWallet(false);
+        return;
+      }
+
+      try {
+        setCheckingWallet(true);
+        const balanceResult = await getBalance(user.id, user.email);
+        // If getBalance succeeds, user has a wallet
+        setHasWallet(balanceResult.success && balanceResult.walletId !== undefined);
+      } catch (err) {
+        setHasWallet(false);
+      } finally {
+        setCheckingWallet(false);
+      }
+    };
+
+    if (user?.id) {
+      checkWallet();
+    } else {
+      setHasWallet(false);
+      setCheckingWallet(false);
+    }
+  }, [user]);
+
   // Fetch user's events
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !hasWallet) return;
 
       setLoadingEvents(true);
       setError("");
@@ -83,15 +115,15 @@ const CreateEventPage = () => {
       }
     };
 
-    if (user?.id) {
+    if (user?.id && hasWallet) {
       fetchEvents();
     }
-  }, [user?.id]);
+  }, [user?.id, hasWallet]);
 
   // Fetch user's tickets (for seller view)
   useEffect(() => {
     const fetchTickets = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !hasWallet) return;
 
       setLoadingTickets(true);
       setTicketsError("");
@@ -110,15 +142,15 @@ const CreateEventPage = () => {
       }
     };
 
-    if (user?.id && activeTab === "tickets") {
+    if (user?.id && hasWallet && activeTab === "tickets") {
       fetchTickets();
     }
-  }, [user?.id, user?.email, activeTab]);
+  }, [user?.id, user?.email, activeTab, hasWallet]);
 
   // Fetch purchased tickets (tickets user bought)
   useEffect(() => {
     const fetchPurchasedTickets = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !hasWallet) return;
 
       setLoadingPurchasedTickets(true);
       try {
@@ -133,15 +165,15 @@ const CreateEventPage = () => {
       }
     };
 
-    if (user?.id && activeTab === "tickets") {
+    if (user?.id && hasWallet && activeTab === "tickets") {
       fetchPurchasedTickets();
     }
-  }, [user?.id, user?.email, activeTab]);
+  }, [user?.id, user?.email, activeTab, hasWallet]);
 
   // Fetch ticket sales (for seller management)
   useEffect(() => {
     const fetchTicketSales = async () => {
-      if (!user?.id) return;
+      if (!user?.id || !hasWallet) return;
 
       setLoadingTicketSales(true);
       try {
@@ -156,10 +188,10 @@ const CreateEventPage = () => {
       }
     };
 
-    if (user?.id && activeTab === "tickets") {
+    if (user?.id && hasWallet && activeTab === "tickets") {
       fetchTicketSales();
     }
-  }, [user?.id, user?.email, activeTab]);
+  }, [user?.id, user?.email, activeTab, hasWallet]);
 
   const handleEventSuccess = () => {
     // Refresh events after successful creation
@@ -342,28 +374,88 @@ const CreateEventPage = () => {
       <Sidebar />
       <div className="flex-1 w-0 md:ml-56 lg:ml-56 xl:ml-60">
         <div className="max-w-7xl mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8 py-3 xs:py-4 sm:py-6 md:py-8 lg:py-12">
-          {/* Header Row */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold mb-1 sm:mb-2" style={{ color: '#800000' }}>
-                Create Event
-              </h1>
-              <p className="text-xs xs:text-sm text-gray-600 sm:text-[#800000]">
-                Create new events or view your created events
-              </p>
+          {checkingWallet ? (
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#800000] mx-auto mb-4"></div>
+                <p style={{ color: '#800000' }}>Checking wallet status...</p>
+              </div>
             </div>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="px-4 xs:px-6 py-2 xs:py-3 text-sm xs:text-base text-white rounded-lg font-semibold hover:opacity-90 transition-opacity touch-manipulation whitespace-nowrap w-full sm:w-auto"
-              style={{ backgroundColor: '#800000' }}
-              tabIndex={0}
-            >
-              Create Event
-            </button>
-          </div>
+          ) : !hasWallet ? (
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="bg-white rounded-lg shadow-md p-8 text-center max-w-md w-full">
+              <div className="mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full" style={{ backgroundColor: '#f5f5f0' }}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    style={{ color: '#800000' }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold mb-3" style={{ color: '#800000' }}>
+                  Wallet Required
+                </h2>
+                <p className="text-lg mb-6" style={{ color: '#800000' }}>
+                  You need a wallet to create and manage events. Complete your KYC application to get approved and receive your digital wallet.
+                </p>
+              </div>
+              <button
+                onClick={() => router.push("/kyc")}
+                className="px-6 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-2"
+                style={{ backgroundColor: '#800000' }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Apply for Wallet
+              </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Header Row */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mt-30">
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold mb-1 sm:mb-2" style={{ color: '#800000' }}>
+                    Create Event
+                  </h1>
+                  <p className="text-xs xs:text-sm text-gray-600 sm:text-[#800000]">
+                    Create new events or view your created events
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="px-4 xs:px-6 py-2 xs:py-3 text-sm xs:text-base text-white rounded-lg font-semibold hover:opacity-90 transition-opacity touch-manipulation whitespace-nowrap w-full sm:w-auto"
+                  style={{ backgroundColor: '#800000' }}
+                  tabIndex={0}
+                >
+                  Create Event
+                </button>
+              </div>
 
-          {/* Tabs */}
-          <div className="mb-4 sm:mb-6 border-b border-gray-300 overflow-x-auto -mx-2 xs:-mx-3 sm:mx-0 px-2 xs:px-3 sm:px-0">
+              {/* Tabs */}
+              <div className="mb-4 sm:mb-6 border-b border-gray-300 overflow-x-auto -mx-2 xs:-mx-3 sm:mx-0 px-2 xs:px-3 sm:px-0">
             <div className="flex gap-2 sm:gap-4 min-w-max pb-1">
               <button
                 onClick={() => setActiveTab("pending")}
@@ -863,11 +955,13 @@ const CreateEventPage = () => {
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Create Event Modal */}
-      {user && (
+      {user && hasWallet && (
         <CreateEventModal
           isOpen={isCreateModalOpen}
           onClose={() => {

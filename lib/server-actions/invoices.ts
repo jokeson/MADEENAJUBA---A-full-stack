@@ -294,6 +294,19 @@ export async function payInvoiceByRef(
         }
       );
 
+      // 8. Create notification for invoice issuer
+      const { createNotification } = await import("./notifications");
+      await createNotification({
+        userId: invoice.issuerUserId.toString(),
+        type: "transaction",
+        title: "Invoice Paid",
+        message: `Your invoice (${invoice.ref}) for ${(amountCents / 100).toFixed(2)} has been paid by ${payerWallet.walletId}`,
+        link: "/wallet/invoices",
+        meta: {
+          transactionId: issuerTransaction._id?.toString(),
+        },
+      });
+
       return {
         success: true,
         message: "Invoice paid successfully",
@@ -571,20 +584,19 @@ export async function getUserInvoices(userId: string, email?: string) {
     const { getCollection } = await import("@/lib/db");
     const invoicesCollection = await getCollection<InvoiceModel>(COLLECTIONS.INVOICES);
 
-    // Get issued invoices (invoices created by this user)
-    const issuedInvoices = await invoicesCollection
-      .find({ issuerUserId: mongoUserId })
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    // Get received invoices (invoices sent to this user's wallet)
-    const receivedInvoices = await invoicesCollection
-      .find({ recipientWalletId: userWallet.walletId })
+    // Get all invoices related to this user (both issued and received)
+    const allInvoices = await invoicesCollection
+      .find({
+        $or: [
+          { issuerUserId: mongoUserId },
+          { recipientWalletId: userWallet.walletId }
+        ]
+      })
       .sort({ createdAt: -1 })
       .toArray();
 
     // Format invoices for display
-    const formatInvoice = async (invoice: InvoiceModel, type: "issued" | "received") => {
+    const formatInvoice = async (invoice: InvoiceModel) => {
       const { getUserById, getWalletByWalletId } = await import("@/lib/db/utils");
       const issuer = await getUserById(invoice.issuerUserId);
       const recipientWallet = await getWalletByWalletId(invoice.recipientWalletId);
@@ -593,7 +605,6 @@ export async function getUserInvoices(userId: string, email?: string) {
       return {
         _id: invoice._id?.toString(),
         ref: invoice.ref || invoice._id?.toString(),
-        type: type,
         issuerEmail: issuer?.email || "Unknown",
         recipientWalletId: invoice.recipientWalletId,
         recipientEmail: recipient?.email || "Unknown",
@@ -604,20 +615,59 @@ export async function getUserInvoices(userId: string, email?: string) {
         status: invoice.status,
         createdAt: invoice.createdAt.toISOString(),
         paidAt: invoice.paidAt?.toISOString(),
+        // Store original invoice data for filtering
+        _invoice: invoice,
       };
     };
 
-    const formattedIssued = await Promise.all(
-      issuedInvoices.map((inv) => formatInvoice(inv, "issued"))
+    const formattedInvoices = await Promise.all(
+      allInvoices.map((inv) => formatInvoice(inv))
     );
-    const formattedReceived = await Promise.all(
-      receivedInvoices.map((inv) => formatInvoice(inv, "received"))
-    );
+
+    // Categorize invoices based on payment status and user role
+    // "Sent" tab: 
+    //   - Invoices you issued (created) that are unpaid (you sent them)
+    //   - Invoices you received and paid (paid invoices where you are the recipient - you sent payment)
+    // "Received" tab:
+    //   - Invoices you received (sent to your wallet) that are unpaid (you received them)
+    //   - Invoices you issued that were paid (paid invoices where you are the issuer - you received payment)
+    
+    const sentInvoices = formattedInvoices.filter((inv) => {
+      const isIssuer = inv._invoice.issuerUserId.toString() === mongoUserId.toString();
+      const isRecipient = inv._invoice.recipientWalletId === userWallet.walletId;
+      
+      if (inv.status === "paid") {
+        // Paid invoices: show in "Sent" if user is the recipient (they paid it)
+        return isRecipient && !isIssuer;
+      } else {
+        // Unpaid invoices: show in "Sent" if user is the issuer (they sent it)
+        return isIssuer && !isRecipient;
+      }
+    });
+
+    const receivedInvoices = formattedInvoices.filter((inv) => {
+      const isIssuer = inv._invoice.issuerUserId.toString() === mongoUserId.toString();
+      const isRecipient = inv._invoice.recipientWalletId === userWallet.walletId;
+      
+      if (inv.status === "paid") {
+        // Paid invoices: show in "Received" if user is the issuer (they received payment)
+        return isIssuer && !isRecipient;
+      } else {
+        // Unpaid invoices: show in "Received" if user is the recipient (they received it)
+        return isRecipient && !isIssuer;
+      }
+    });
+
+    // Remove the temporary _invoice field before returning
+    const cleanInvoice = (inv: any) => {
+      const { _invoice, ...rest } = inv;
+      return rest;
+    };
 
     return {
       success: true,
-      issued: formattedIssued,
-      received: formattedReceived,
+      issued: sentInvoices.map(cleanInvoice),
+      received: receivedInvoices.map(cleanInvoice),
     };
   } catch (error) {
     console.error("Error getting user invoices:", error);

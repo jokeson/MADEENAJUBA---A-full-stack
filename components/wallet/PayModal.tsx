@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getInvoiceByRef, payInvoiceByRef } from "@/lib/server-actions/invoices";
+import toast from "react-hot-toast";
 
 interface PayModalProps {
   isOpen: boolean;
@@ -67,7 +68,9 @@ const PayModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: PayModalPro
       const result = await payInvoiceByRef(referenceNumber.trim(), userId, userEmail);
 
       if (result.success) {
-        setSuccess(`Invoice paid successfully! Amount: $${result.amount?.toFixed(2)}`);
+        const successMsg = `Invoice paid successfully! Amount: $${result.amount?.toFixed(2)}`;
+        toast.success(successMsg);
+        setSuccess(successMsg);
         setStep("success");
         
         // Close modal after a brief delay
@@ -76,7 +79,9 @@ const PayModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: PayModalPro
           handleClose();
         }, 2000);
       } else {
-        setError(result.error || "Failed to process payment");
+        const errorMsg = result.error || "Failed to process payment";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");

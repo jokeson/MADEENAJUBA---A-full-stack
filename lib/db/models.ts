@@ -178,6 +178,51 @@ export interface TicketModel {
   createdAt: Date;
 }
 
+// Post Model
+export interface PostModel {
+  _id?: ObjectId;
+  authorUserId: ObjectId; // User who created the post
+  title: string; // Post title
+  content: string; // Full post content (rich text/HTML)
+  excerpt?: string; // Short excerpt for card preview
+  imageUrl?: string; // Feature image URL (Cloudinary)
+  category: "Politics" | "Sports" | "Business & Economy" | "Technology" | "Entertainment" | "Community & Local News" | "Breaking News" | "Opinion and Article" | "Events" | "Interview" | "Lifestyle"; // Post category
+  publishedAt: Date; // Publication date & time
+  createdAt: Date;
+  updatedAt: Date;
+  likes?: number; // Number of likes (default: 0)
+  views?: number; // Number of views (default: 0)
+}
+
+// Comment Model
+export interface CommentModel {
+  _id?: ObjectId;
+  postId: ObjectId; // Post this comment belongs to
+  authorUserId: ObjectId; // User who wrote the comment
+  content: string; // Comment text
+  parentCommentId?: ObjectId; // For reply comments (optional)
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Notification Model
+export interface NotificationModel {
+  _id?: ObjectId;
+  userId: ObjectId; // User who receives the notification
+  type: "transaction" | "post" | "event_approval" | "message";
+  title: string; // Notification title
+  message: string; // Notification message
+  read: boolean; // Whether the notification has been read
+  link?: string; // Optional link to navigate to (e.g., /wallet, /events/123)
+  meta?: {
+    transactionId?: ObjectId;
+    postId?: ObjectId;
+    eventId?: ObjectId;
+    messageId?: ObjectId;
+  };
+  createdAt: Date;
+}
+
 // Collection names constants
 export const COLLECTIONS = {
   USERS: "users",
@@ -191,5 +236,8 @@ export const COLLECTIONS = {
   SYSTEM_SETTINGS: "system_settings",
   EVENTS: "events",
   TICKETS: "tickets",
+  POSTS: "posts",
+  COMMENTS: "comments",
+  NOTIFICATIONS: "notifications",
 } as const;
 

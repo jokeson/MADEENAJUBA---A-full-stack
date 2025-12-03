@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { redeemCode } from "@/lib/server-actions/wallet";
+import toast from "react-hot-toast";
 
 interface DepositModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ const DepositModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: Deposit
       const result = await redeemCode(userId, code, pin, userEmail);
 
       if (result.success) {
+        toast.success(result.message || "Deposit successful!");
         setCode("");
         setPin("");
         setSuccess(result.message || "Deposit successful!");
@@ -36,7 +38,9 @@ const DepositModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: Deposit
           onClose();
         }, 1500);
       } else {
-        setError(result.error || "Failed to deposit");
+        const errorMsg = result.error || "Failed to deposit";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { sendMoney, getRecipientInfoByWalletId } from "@/lib/server-actions/wallet";
+import toast from "react-hot-toast";
 
 interface SendModalProps {
   isOpen: boolean;
@@ -83,6 +84,7 @@ const SendModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: SendModalP
       );
 
       if (result.success) {
+        toast.success(result.message || `Successfully sent $${amountNum.toFixed(2)}! Reference: ${result.ref || "N/A"}`);
         setRecipientWalletId("");
         setAmount("");
         setNote("");
@@ -91,7 +93,9 @@ const SendModal = ({ isOpen, onClose, onSuccess, userId, userEmail }: SendModalP
         onSuccess();
         onClose();
       } else {
-        setError(result.error || "Failed to send money");
+        const errorMsg = result.error || "Failed to send money";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       setError("An error occurred. Please try again.");

@@ -52,6 +52,23 @@ const TransactionDetailModal = ({
 
   if (!isOpen || !transaction) return null;
 
+  /**
+   * Get transaction amount color based on type
+   * Green for deposits/received, Red for withdrawals/sent
+   */
+  const getTransactionAmountColor = (tx: any): string => {
+    // Red for outgoing transactions (withdrawals, sends, cash payouts)
+    if (
+      tx.type === "send" ||
+      tx.type === "request" ||
+      tx.type === "cash_payout"
+    ) {
+      return "text-red-600";
+    }
+    // Green for incoming transactions (deposits, received)
+    return "text-green-600";
+  };
+
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
   };
@@ -445,10 +462,11 @@ const TransactionDetailModal = ({
             <div className="text-center py-4 border-b">
               <p className="text-sm mb-2" style={{ color: '#800000' }}>Amount</p>
               <p
-                className="text-4xl font-bold"
-                style={{ color: '#800000' }}
+                className={`text-4xl font-bold ${getTransactionAmountColor(transaction)}`}
               >
-                {transaction.type === "send" || transaction.type === "request"
+                {transaction.type === "send" || 
+                 transaction.type === "request" || 
+                 transaction.type === "cash_payout"
                   ? "-"
                   : "+"}
                 ${transaction.amount.toLocaleString("en-US", {

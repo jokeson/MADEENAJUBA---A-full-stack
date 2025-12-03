@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 interface NavbarProps {
   onOpenLoginModal: () => void;
@@ -122,6 +123,9 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Right Side - Action Buttons or Profile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+            {/* Notification Bell - Only shown when authenticated */}
+            {isAuthenticated && <NotificationBell />}
+
             {/* Action Buttons - Desktop - Hidden when authenticated */}
             {!isAuthenticated && (
               <div className="hidden lg:flex items-center gap-2 pb-2 sm:gap-4">
@@ -193,13 +197,15 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
             )}
           </div>
 
-          {/* Mobile Menu Button - Visible only on mobile */}
-          <button
-            onClick={toggleMobileMenu}
-            className="md:hidden absolute right-0 p-2 text-[#663300] hover:bg-white/10 rounded-lg transition-colors"
-            aria-label="Toggle menu"
-            tabIndex={0}
-          >
+          {/* Mobile Menu Button and Notification Bell - Visible only on mobile */}
+          <div className="md:hidden flex items-center gap-2 absolute right-0">
+            {isAuthenticated && <NotificationBell />}
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 text-[#663300] hover:bg-white/10 rounded-lg transition-colors"
+              aria-label="Toggle menu"
+              tabIndex={0}
+            >
             {isMobileMenuOpen ? (
               <svg
                 className="w-6 h-6"
@@ -229,7 +235,8 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 />
               </svg>
             )}
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}

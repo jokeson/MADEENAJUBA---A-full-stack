@@ -2,7 +2,7 @@
 
 import { ObjectId } from "mongodb";
 import { getCollection } from "@/lib/db";
-import { COLLECTIONS, EventModel, TicketModel, TransactionModel, FeeModel, WalletModel } from "@/lib/db/models";
+import { COLLECTIONS, EventModel, TicketModel, TransactionModel, FeeModel, WalletModel, UserModel } from "@/lib/db/models";
 import { getWalletByUserId, updateWalletBalance, getUserById, getUserByEmail } from "@/lib/db/utils";
 
 // Helper function to get MongoDB user ID from localStorage user ID or email
@@ -114,9 +114,45 @@ export async function createEvent(data: {
     const result = await eventsCollection.insertOne(eventData);
 
     if (result.insertedId) {
+      const eventId = result.insertedId.toString();
+
+      // If event needs approval (PENDING status), notify all admins
+      if (status === "PENDING") {
+        try {
+          const usersCollection = await getCollection<UserModel>(COLLECTIONS.USERS);
+          const adminUsers = await usersCollection
+            .find({ role: "admin" })
+            .toArray();
+
+          // Get creator info for notification message
+          const creator = await getUserById(data.creatorUserId);
+          const creatorEmail = creator?.email || "Unknown user";
+
+          // Create notifications for all admins
+          const { createNotification } = await import("./notifications");
+          await Promise.all(
+            adminUsers.map((admin) =>
+              createNotification({
+                userId: admin._id!.toString(),
+                type: "event_approval",
+                title: "New Event Pending Approval",
+                message: `Event "${data.title.trim()}" created by ${creatorEmail} needs your approval.`,
+                link: "/admin",
+                meta: {
+                  eventId: eventId,
+                },
+              })
+            )
+          );
+        } catch (notificationError) {
+          // Log error but don't fail event creation
+          console.error("Error creating admin notifications for event:", notificationError);
+        }
+      }
+
       return {
         success: true,
-        eventId: result.insertedId.toString(),
+        eventId: eventId,
         message: data.isFree
           ? "Event created successfully! It will appear on the landing page immediately."
           : "Event created successfully! Your event is under review. Admin will respond within 24 hours.",
@@ -349,6 +385,23 @@ export async function approveEvent(eventId: string, adminUserId: string) {
 
     if (result.matchedCount === 0) {
       return { success: false, error: "Event not found or already reviewed" };
+    }
+
+    // Get event to notify creator
+    const approvedEvent = await eventsCollection.findOne({ _id: new ObjectId(eventId) });
+    if (approvedEvent) {
+      // Create notification for event creator
+      const { createNotification } = await import("./notifications");
+      await createNotification({
+        userId: approvedEvent.creatorUserId.toString(),
+        type: "event_approval",
+        title: "Event Approved",
+        message: `Your event "${approvedEvent.title}" has been approved and is now live!`,
+        link: `/events/${eventId}`,
+        meta: {
+          eventId: eventId,
+        },
+      });
     }
 
     return { success: true, message: "Event approved successfully" };

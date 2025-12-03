@@ -10,6 +10,7 @@ interface NewsItem {
   title: string;
   description: string;
   image: string;
+  category?: string;
   datePosted: string;
   timePosted: string;
   views: string;
@@ -78,6 +79,13 @@ const NewsCard = ({ news, index }: { news: NewsItem; index: number }) => {
           />
           {/* Gradient Overlay for better text readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
+          {/* Category Tag */}
+          {news.category && (
+            <div className="absolute top-3 left-3 bg-[#800000] text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
+              {news.category}
+            </div>
+          )}
           
           {/* View Count Badge - Futuristic style */}
           <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/20">

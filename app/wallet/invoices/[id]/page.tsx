@@ -575,12 +575,12 @@ export default function InvoiceDetailPage() {
     <div className="min-h-screen bg-[#f5f5f0] flex">
       <Sidebar />
       <div className="flex-1 lg:ml-64">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 xs:pt-24 sm:pt-20 md:pt-12 pb-8 sm:pb-12">
           {/* Header */}
           <div className="mb-6">
             <button
               onClick={() => router.back()}
-              className="mb-4 text-[#800000] hover:text-[#800000]/80 transition-colors flex items-center gap-2"
+              className="mb-4 mt-2 xs:mt-4 sm:mt-2 md:mt-0 text-[#800000] hover:text-[#800000]/80 transition-colors flex items-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

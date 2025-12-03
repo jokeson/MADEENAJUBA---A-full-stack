@@ -102,11 +102,11 @@ export default async function EventDetailPage({
   
   return (
     <div className="min-h-screen bg-[#f5f5f0]">
-      <div className="max-w-6xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-6 xs:py-8 sm:py-10 md:py-12 lg:py-16">
+      <div className="max-w-6xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 pt-20 xs:pt-24 sm:pt-20 md:pt-12 lg:pt-16 pb-6 xs:pb-8 sm:pb-10 md:pb-12 lg:pb-16">
         {/* Back Button */}
         <Link
           href="/events"
-          className="inline-flex items-center mb-4 xs:mb-5 sm:mb-6 text-[#800000] hover:text-[#900000] transition-colors text-sm xs:text-base"
+          className="inline-flex items-center mb-4 xs:mb-5 sm:mb-6 mt-2 xs:mt-4 sm:mt-2 md:mt-0 text-[#800000] hover:text-[#900000] transition-colors text-sm xs:text-base"
           tabIndex={0}
           aria-label="Back to events"
         >

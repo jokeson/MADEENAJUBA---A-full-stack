@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getPlatformStatistics } from "@/lib/server-actions/admin";
 import PoolDetailsModal from "./PoolDetailsModal";
 import CashPayoutDetailsModal from "./CashPayoutDetailsModal";
@@ -17,9 +18,12 @@ interface Statistics {
   totalCashPayoutCents: number;
   totalAmountInPool: number;
   totalAmountInPoolCents: number;
+  totalDepositedFees: number;
+  totalDepositedFeesCents: number;
 }
 
 const Statistics = () => {
+  const router = useRouter();
   const [statistics, setStatistics] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,7 +201,7 @@ const Statistics = () => {
     },
     {
       title: "Total Wallet Balance",
-      value: `$${statistics.totalBalance.toLocaleString("en-US", {
+      value: `SSP ${statistics.totalBalance.toLocaleString("en-US", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}`,
@@ -223,7 +227,7 @@ const Statistics = () => {
     },
     {
       title: "Total Cash Paid",
-      value: `$${statistics.totalCashPayout.toLocaleString("en-US", {
+      value: `SSP ${statistics.totalCashPayout.toLocaleString("en-US", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}`,
@@ -249,7 +253,7 @@ const Statistics = () => {
     },
     {
       title: "Total Amount in Pool",
-      value: `$${statistics.totalAmountInPool.toLocaleString("en-US", {
+      value: `SSP ${statistics.totalAmountInPool.toLocaleString("en-US", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}`,
@@ -273,6 +277,32 @@ const Statistics = () => {
       bgColor: "bg-amber-50",
       textColor: "text-amber-600",
     },
+    {
+      title: "Total Deposited Fees",
+      value: `SSP ${(statistics.totalDepositedFees || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`,
+      icon: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-8 w-8"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+          />
+        </svg>
+      ),
+      color: "bg-teal-500",
+      bgColor: "bg-teal-50",
+      textColor: "text-teal-600",
+    },
   ];
 
   return (
@@ -284,13 +314,16 @@ const Statistics = () => {
           {statCards.map((card, index) => {
             const isPoolCard = card.title === "Total Amount in Pool";
             const isCashPayoutCard = card.title === "Total Cash Paid";
-            const isClickable = isPoolCard || isCashPayoutCard;
+            const isFeesCard = card.title === "Total Deposited Fees";
+            const isClickable = isPoolCard || isCashPayoutCard || isFeesCard;
             
             const handleClick = () => {
               if (isPoolCard) {
                 setIsPoolModalOpen(true);
               } else if (isCashPayoutCard) {
                 setIsCashPayoutModalOpen(true);
+              } else if (isFeesCard) {
+                router.push("/admin/fees/statistics");
               }
             };
 
@@ -316,6 +349,8 @@ const Statistics = () => {
                     ? "Click to view pool details"
                     : isCashPayoutCard
                     ? "Click to view cash payout details"
+                    : isFeesCard
+                    ? "Click to view fee statistics"
                     : undefined
                 }
             >
@@ -390,11 +425,11 @@ const Statistics = () => {
                 <span className="text-sm text-[#800000]">Average Balance per Wallet</span>
                 <span className="text-sm font-semibold text-indigo-600">
                   {statistics.totalWallets > 0
-                    ? `$${(statistics.totalBalance / statistics.totalWallets).toLocaleString("en-US", {
+                    ? `SSP ${(statistics.totalBalance / statistics.totalWallets).toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}`
-                    : "$0.00"}
+                    : "SSP 0.00"}
                 </span>
               </div>
             </div>

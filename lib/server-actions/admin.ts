@@ -714,6 +714,183 @@ export async function getDepositedTicketFees() {
   }
 }
 
+/**
+ * Get deposited fees organized by time period (day, week, month, year, total)
+ * Returns fees grouped by the specified time period
+ */
+export async function getDepositedFeesByPeriod(period: "day" | "week" | "month" | "year" | "total") {
+  try {
+    const feesCollection = await getCollection<FeeModel>(COLLECTIONS.FEES);
+    const transactionsCollection = await getCollection<TransactionModel>(COLLECTIONS.TRANSACTIONS);
+    
+    // Get ALL deposited fees
+    const depositedFees = await feesCollection.find({ 
+      deposited: true
+    }).sort({ depositedAt: -1 }).toArray();
+    
+    // Get transaction IDs to fetch related transactions
+    const transactionIds = depositedFees
+      .map((fee) => fee.transactionId)
+      .filter((id): id is ObjectId => id !== undefined);
+    
+    // Fetch all related transactions
+    const transactions = transactionIds.length > 0
+      ? await transactionsCollection
+          .find({ _id: { $in: transactionIds } })
+          .toArray()
+      : [];
+    
+    // Create a map for quick lookup
+    const transactionMap = new Map(
+      transactions.map((tx) => [tx._id?.toString(), tx])
+    );
+    
+    // Helper function to format date based on period
+    const formatDateByPeriod = (date: Date, periodType: string): string => {
+      const d = date instanceof Date ? date : new Date(date);
+      
+      switch (periodType) {
+        case "day":
+          return d.toISOString().split('T')[0]; // YYYY-MM-DD
+        case "week":
+          const weekStart = new Date(d);
+          weekStart.setDate(d.getDate() - d.getDay()); // Start of week (Sunday)
+          return `Week of ${weekStart.toISOString().split('T')[0]}`;
+        case "month":
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // YYYY-MM
+        case "year":
+          return String(d.getFullYear()); // YYYY
+        case "total":
+          return "Total";
+        default:
+          return d.toISOString().split('T')[0];
+      }
+    };
+    
+    // Group fees by period
+    const feesByPeriod = new Map<string, {
+      period: string;
+      totalAmount: number;
+      totalAmountCents: number;
+      count: number;
+      fees: Array<{
+        _id: string;
+        feeType: "p2p" | "ticket" | "invoice" | "withdrawal";
+        fromWalletId: string;
+        depositAmount: number;
+        depositAmountCents: number;
+        date: string;
+        time: string;
+        depositedAt: string;
+        ref: string;
+      }>;
+    }>();
+    
+    depositedFees.forEach((fee) => {
+      if (!fee.depositedAt) return;
+      
+      const depositedDate = fee.depositedAt instanceof Date 
+        ? fee.depositedAt 
+        : new Date(fee.depositedAt);
+      
+      const periodKey = formatDateByPeriod(depositedDate, period);
+      
+      const transaction = fee.transactionId 
+        ? transactionMap.get(fee.transactionId.toString())
+        : null;
+      
+      // Determine fee type
+      let feeType: "p2p" | "ticket" | "invoice" | "withdrawal" = "p2p";
+      let fromWalletId = "Unknown";
+      let ref = "";
+      
+      if (fee.type === "withdrawal") {
+        feeType = "withdrawal";
+        if (transaction) {
+          fromWalletId = transaction.fromWalletId || "Unknown";
+          ref = transaction.ref || "";
+        }
+      } else if (fee.type === "transaction" && transaction) {
+        if (transaction.type === "send") {
+          feeType = "p2p";
+          fromWalletId = transaction.fromWalletId || "Unknown";
+          ref = transaction.ref || "";
+        } else if (transaction.type === "ticket_payout") {
+          feeType = "ticket";
+          fromWalletId = transaction.fromWalletId || "Unknown";
+          ref = transaction.ref || "";
+        } else if (transaction.type === "invoice_payment") {
+          feeType = "invoice";
+          fromWalletId = transaction.fromWalletId || "Unknown";
+          ref = transaction.ref || "";
+        }
+      }
+      
+      const feeDetail = {
+        _id: fee._id?.toString() || "",
+        feeType: feeType,
+        fromWalletId: fromWalletId,
+        depositAmount: fee.amount / 100,
+        depositAmountCents: fee.amount,
+        date: depositedDate.toISOString().split('T')[0],
+        time: depositedDate.toTimeString().split(' ')[0],
+        depositedAt: depositedDate.toISOString(),
+        ref: ref,
+      };
+      
+      if (!feesByPeriod.has(periodKey)) {
+        feesByPeriod.set(periodKey, {
+          period: periodKey,
+          totalAmount: 0,
+          totalAmountCents: 0,
+          count: 0,
+          fees: [],
+        });
+      }
+      
+      const periodData = feesByPeriod.get(periodKey)!;
+      periodData.totalAmount += fee.amount / 100;
+      periodData.totalAmountCents += fee.amount;
+      periodData.count += 1;
+      periodData.fees.push(feeDetail);
+    });
+    
+    // Convert map to array and sort
+    const result = Array.from(feesByPeriod.values()).map((periodData) => ({
+      ...periodData,
+      fees: periodData.fees.sort((a, b) => 
+        new Date(b.depositedAt).getTime() - new Date(a.depositedAt).getTime()
+      ),
+    }));
+    
+    // Sort by period (newest first, except for "total")
+    if (period === "total") {
+      return result;
+    }
+    
+    result.sort((a, b) => {
+      if (period === "day") {
+        return b.period.localeCompare(a.period);
+      } else if (period === "week") {
+        // Extract date from "Week of YYYY-MM-DD"
+        const dateA = a.period.split(' ')[2];
+        const dateB = b.period.split(' ')[2];
+        return dateB.localeCompare(dateA);
+      } else if (period === "month") {
+        return b.period.localeCompare(a.period);
+      } else if (period === "year") {
+        return b.period.localeCompare(a.period);
+      }
+      return 0;
+    });
+    
+    return result;
+  } catch (error) {
+    console.error("Error getting deposited fees by period:", error);
+    return [];
+  }
+}
+
 export async function getAllFees() {
   try {
     const feesCollection = await getCollection<FeeModel>(COLLECTIONS.FEES);
@@ -1168,6 +1345,18 @@ export async function getPlatformStatistics() {
     );
     const totalAmountInPool = totalAmountInPoolCents / 100;
 
+    // Calculate total deposited fees (fees that have been deposited to admin wallet)
+    const feesCollection = await getCollection<FeeModel>(COLLECTIONS.FEES);
+    const depositedFees = await feesCollection.find({ 
+      deposited: true
+    }).toArray();
+    
+    const totalDepositedFeesCents = depositedFees.reduce(
+      (sum, fee) => sum + (fee.amount || 0),
+      0
+    );
+    const totalDepositedFees = totalDepositedFeesCents / 100;
+
     return {
       success: true,
       statistics: {
@@ -1182,6 +1371,8 @@ export async function getPlatformStatistics() {
         totalCashPayoutCents,
         totalAmountInPool,
         totalAmountInPoolCents,
+        totalDepositedFees,
+        totalDepositedFeesCents,
       },
     };
   } catch (error) {
@@ -1201,6 +1392,8 @@ export async function getPlatformStatistics() {
         totalCashPayoutCents: 0,
         totalAmountInPool: 0,
         totalAmountInPoolCents: 0,
+        totalDepositedFees: 0,
+        totalDepositedFeesCents: 0,
       },
     };
   }

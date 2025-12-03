@@ -1,50 +1,28 @@
 import NewsCard from "./cards/NewsCard";
+import { getAllPosts } from "@/lib/server-actions/posts";
 
-const CertificationsAwards = () => {
-  const newsItems = [
-    {
-      id: "1",
-      title: "City Council Approves New Downtown Development Project",
-      description: "The city council has unanimously approved a major downtown development project that will bring new businesses and housing to the area.",
-      image: "/hero-background.jpg",
-      datePosted: new Date().toISOString(),
-      timePosted: "2:30 PM",
-      views: "45K",
-    },
-    {
-      id: "2",
-      title: "Local Festival Draws Record Attendance This Weekend",
-      description: "The annual city festival broke attendance records this year with over 50,000 visitors enjoying food, music, and local vendors.",
-      image: "/hero-background.jpg",
-      datePosted: new Date(Date.now() - 86400000).toISOString(),
-      timePosted: "11:15 AM",
-      views: "32K",
-    },
-    {
-      id: "3",
-      title: "New Public Transportation Route Opens Next Month",
-      description: "City officials announced a new bus route connecting the east and west sides of the city, improving access for thousands of residents.",
-      image: "/hero-background.jpg",
-      datePosted: new Date(Date.now() - 172800000).toISOString(),
-      timePosted: "9:00 AM",
-      views: "28K",
-    },
-    {
-      id: "4",
-      title: "Local School District Receives State Recognition Award",
-      description: "The city's school district has been recognized by the state for excellence in education and innovative teaching methods.",
-      image: "/hero-background.jpg",
-      datePosted: new Date(Date.now() - 259200000).toISOString(),
-      timePosted: "3:45 PM",
-      views: "19K",
-    },
-    
-  ];
-const LatestNews = newsItems.map((news, index) => (
-    <div
-      key={news.id}
-      className="bg-transparent"
-    >
+const CertificationsAwards = async () => {
+  const result = await getAllPosts();
+  const newsItems = result.success ? result.posts : [];
+
+  // If no posts, show empty state or fallback
+  if (newsItems.length === 0) {
+    return (
+      <section className="py-6 xs:py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20">
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8">
+          <h2 className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-black mb-4 xs:mb-5 sm:mb-6 md:mb-8 lg:mb-10 xl:mb-12 text-center px-2 break-words">
+            Latest News
+          </h2>
+          <div className="text-center text-gray-500 py-12">
+            <p>No news posts available yet. Check back soon!</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const LatestNews = newsItems.map((news, index) => (
+    <div key={news.id} className="bg-transparent">
       <NewsCard news={news} index={index} />
     </div>
   ));

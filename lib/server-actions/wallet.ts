@@ -231,7 +231,20 @@ export async function sendMoney(
     };
 
     await transactionsCollection.insertOne(senderTransaction);
-    await transactionsCollection.insertOne(recipientTransaction);
+    const recipientTransactionResult = await transactionsCollection.insertOne(recipientTransaction);
+    
+    // Create notification for recipient
+    const { createNotification } = await import("./notifications");
+    await createNotification({
+      userId: recipientWallet.userId.toString(),
+      type: "transaction",
+      title: "Money Received",
+      message: `You received ${(amountCents / 100).toFixed(2)} from ${senderWallet.walletId}${note ? `: ${note}` : ""}`,
+      link: "/wallet",
+      meta: {
+        transactionId: recipientTransactionResult.insertedId?.toString(),
+      },
+    });
 
     // Only record fee transaction and fee ledger if fee is greater than 0 (admin accounts are exempt)
     if (feeCents > 0) {

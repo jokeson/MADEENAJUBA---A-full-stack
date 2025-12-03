@@ -23,13 +23,138 @@ The project uses:
 Renders multiple categories:
 
 - Politics
-- Articles & Opinions
 - Sports
+- Business & Economy
+- Technology
+- Entertainment
+- Community & Local News
 - Breaking News
+- Opinion and Article
+- Events
+- Interview
+- Lifestyle
 
 Journalists (assigned by Admin) can create and publish news posts.
 
 Visitors and authenticated users can explore news by category.
+
+#### Post Creation & Publishing Module
+
+This module enables authorized users to create and publish news articles within the application. It covers the entire workflow—from post creation to frontend rendering, full-page display, and user interaction features.
+
+**🔐 Roles Allowed to Create Posts**
+
+Only authenticated users with one of the following roles can create posts:
+
+- **Journalist**
+- **Employee**
+- **Admin**
+
+These users can access the Create Post interface directly from their dashboard accounts.
+
+**✏️ Post Creation Workflow**
+
+The Create Post page features a tabbed interface with two main sections:
+
+**Tab 1: Create Post**
+
+When creating a news post, the user can:
+
+- Write content directly in the rich text input or paste text from an external source.
+- Upload a news image (file upload or URL).
+- Provide a news title.
+- **Select a category** from the following options:
+  - Politics
+  - Sports
+  - Business & Economy
+  - Technology
+  - Entertainment
+  - Community & Local News
+  - Breaking News
+  - Opinion and Article
+  - Events
+  - Interview
+  - Lifestyle
+- Submit the post for immediate publishing.
+
+After submission:
+
+- The post is saved in the database with the selected category.
+- The post automatically renders in the frontend Latest News section.
+
+**Tab 2: Posts**
+
+The Posts tab displays a list of all posts created by the current user (or all posts for admins):
+
+- **For Journalists/Employees:** Shows only their own posts
+- **For Admins:** Shows all posts created by all users
+- Each post card displays:
+  - Post image with category tag overlay
+  - Post title
+  - Publication date
+  - View count
+  - Category badge
+- Posts are clickable and open the full details page
+- **Delete functionality:**
+  - Authors can delete their own posts
+  - Admins can delete any post
+  - Deletion removes the post and all associated comments
+
+**🧩 Frontend Rendering (Latest News Section)**
+
+Each post is displayed as a card component, containing:
+
+- Feature image with **category tag** displayed as a badge overlay on the top-left of the image
+- Title
+- Publish date & time
+- Short excerpt of the news
+- A READ MORE button
+
+When the user clicks READ MORE, they are routed to the full news details page using a dynamic URL that includes the post ID.
+
+**📄 Full News Details Page**
+
+The details page renders additional information in full layout:
+
+- Large header image
+- News title
+- Date & time of publication
+- Full content/details
+
+At the bottom of the page, the author information is displayed:
+
+- Author name
+- Email address
+- Profile avatar
+
+**⭐ User Interaction Features**
+
+The news details page supports multiple engagement options:
+
+- **Like button** - Users can like posts (one like per user)
+- **Share options** - Facebook, Email, TikTok (copy link)
+- **Comment section** - Visible only to logged-in users
+
+**Comment Features:**
+
+- **Commenting:** Logged-in users can write comments that appear below the post
+- **Reply to Comments:** Users can reply to existing comments, creating nested comment threads
+- **Hide/Show Comments:** Post authors can hide or show the entire comments section
+- **Comment Threading:** Replies are displayed in a nested structure under parent comments
+- **Author Controls:** Post authors can manage comment visibility for their posts
+
+**📌 Summary**
+
+This feature provides a complete publishing flow allowing journalists, employees, and admins to publish news articles that are fully interactive on the frontend. It includes:
+
+- **Category-based organization** with visual tags on post cards
+- **Tabbed interface** for creating and managing posts
+- **Post management** with delete functionality for authors and admins
+- **Structured content rendering** with category display
+- **Author attribution** with profile information
+- **Engagement tools** including likes, shares, and threaded comments
+- **Comment moderation** with hide/show functionality for authors
+- **Clean routing** with dynamic IDs for post details
 
 ### 2. Events Module
 

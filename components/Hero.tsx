@@ -204,7 +204,7 @@ const Hero = () => {
                 </h1>
 
                 {/* Sub-headline - From Admin */}
-                <p className="text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 leading-relaxed break-words px-1 xs:px-2">
+                <p className="text-xs xs:text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-white leading-relaxed break-words px-1 xs:px-2">
                   {loading
                     ? "Easy-to-use corporate cards, bill payments, accounting, and a whole lot more. All in one place."
                     : heroSettings.subheadline}
