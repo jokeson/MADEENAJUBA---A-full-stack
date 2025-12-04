@@ -1,6 +1,6 @@
 import { MongoClient, Db, MongoClientOptions, Document, Collection } from "mongodb";
 
-// Helper function to get MongoDB URI with validation
+// Lazy initialization function to get MongoDB URI
 const getMongoUri = (): string => {
   const rawUri = process.env.MONGODB_URI;
 
@@ -13,27 +13,22 @@ const getMongoUri = (): string => {
     );
   }
 
-  return rawUri.trim();
-};
-
-// Helper function to validate and fix URI format
-const validateAndFixUri = (uri: string): string => {
-  let fixedUri = uri;
+  let uri: string = rawUri.trim();
 
   // Auto-fix common mistakes: missing // after protocol
-  if (fixedUri.startsWith("mongodb+srv:") && !fixedUri.startsWith("mongodb+srv://")) {
-    fixedUri = fixedUri.replace("mongodb+srv:", "mongodb+srv://");
+  if (uri.startsWith("mongodb+srv:") && !uri.startsWith("mongodb+srv://")) {
+    uri = uri.replace("mongodb+srv:", "mongodb+srv://");
     console.warn("Fixed MongoDB URI: Added missing '//' after 'mongodb+srv:'");
   }
 
-  if (fixedUri.startsWith("mongodb:") && !fixedUri.startsWith("mongodb://") && !fixedUri.startsWith("mongodb+srv://")) {
-    fixedUri = fixedUri.replace(/^mongodb:(?!\/\/)/, "mongodb://");
+  if (uri.startsWith("mongodb:") && !uri.startsWith("mongodb://") && !uri.startsWith("mongodb+srv://")) {
+    uri = uri.replace(/^mongodb:(?!\/\/)/, "mongodb://");
     console.warn("Fixed MongoDB URI: Added missing '//' after 'mongodb:'");
   }
 
   // Validate URI format
-  if (!fixedUri.startsWith("mongodb://") && !fixedUri.startsWith("mongodb+srv://")) {
-    const preview = fixedUri.length > 30 ? fixedUri.substring(0, 30) + "..." : fixedUri;
+  if (!uri.startsWith("mongodb://") && !uri.startsWith("mongodb+srv://")) {
+    const preview = uri.length > 30 ? uri.substring(0, 30) + "..." : uri;
     throw new Error(
       `Invalid MongoDB URI format. Expected URI to start with "mongodb://" or "mongodb+srv://".\n` +
       `Current value: ${preview}\n` +
@@ -42,21 +37,21 @@ const validateAndFixUri = (uri: string): string => {
     );
   }
 
-  return fixedUri;
+  return uri;
 };
 
-const options: MongoClientOptions = {};
+// Cache for client promise (works in both dev and production)
+let cachedClientPromise: Promise<MongoClient> | null = null;
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-// Lazy initialization - only connect when actually needed
+// Lazy initialization function to get client promise
 const getClientPromise = (): Promise<MongoClient> => {
-  if (clientPromise) {
-    return clientPromise;
+  // Return cached promise if it exists
+  if (cachedClientPromise) {
+    return cachedClientPromise;
   }
 
-  const uri = validateAndFixUri(getMongoUri());
+  const uri = getMongoUri();
+  const options: MongoClientOptions = {};
 
   if (process.env.NODE_ENV === "development") {
     // In development mode, use a global variable so that the value
@@ -66,27 +61,27 @@ const getClientPromise = (): Promise<MongoClient> => {
     };
 
     if (!globalWithMongo._mongoClientPromise) {
-      client = new MongoClient(uri, options);
+      const client = new MongoClient(uri, options);
       globalWithMongo._mongoClientPromise = client.connect();
     }
-    clientPromise = globalWithMongo._mongoClientPromise;
+    cachedClientPromise = globalWithMongo._mongoClientPromise;
+    return cachedClientPromise;
   } else {
-    // In production mode, it's best to not use a global variable.
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
+    // In production mode, cache the promise in module scope
+    const client = new MongoClient(uri, options);
+    cachedClientPromise = client.connect();
+    return cachedClientPromise;
   }
-
-  return clientPromise;
 };
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
-// Use lazy initialization to avoid errors during build time
-export default getClientPromise();
+// Export a function that returns the client promise (lazy initialization)
+// This prevents the error during build time when env vars might not be available
+export default getClientPromise;
 
 // Helper function to get the database instance
 export const getDb = async (): Promise<Db> => {
-  const client = await getClientPromise();
+  const clientPromise = getClientPromise();
+  const client = await clientPromise;
   const dbName = process.env.MONGODB_DB_NAME || "madeenajuba";
   return client.db(dbName);
 };
