@@ -1,27 +1,42 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-// Validate Cloudinary environment variables
-const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+// Lazy initialization function to get Cloudinary config
+const getCloudinaryConfig = () => {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-// Check if all required environment variables are set
-if (!cloudName || !apiKey || !apiSecret) {
-  console.error('⚠️ Cloudinary configuration error: Missing environment variables');
-  console.error('Required variables:');
-  console.error('- NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:', cloudName ? '✓ Set' : '✗ Missing');
-  console.error('- CLOUDINARY_API_KEY:', apiKey ? '✓ Set' : '✗ Missing');
-  console.error('- CLOUDINARY_API_SECRET:', apiSecret ? '✓ Set' : '✗ Missing');
-}
+  // Check if all required environment variables are set
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.error('⚠️ Cloudinary configuration error: Missing environment variables');
+    console.error('Required variables:');
+    console.error('- NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME:', cloudName ? '✓ Set' : '✗ Missing');
+    console.error('- CLOUDINARY_API_KEY:', apiKey ? '✓ Set' : '✗ Missing');
+    console.error('- CLOUDINARY_API_SECRET:', apiSecret ? '✓ Set' : '✗ Missing');
+    return null;
+  }
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: cloudName || '',
-  api_key: apiKey || '',
-  api_secret: apiSecret || '',
-  secure: true,
-});
+  return { cloudName, apiKey, apiSecret };
+};
 
+// Lazy initialization function to configure Cloudinary
+const configureCloudinary = () => {
+  const config = getCloudinaryConfig();
+  if (!config) {
+    return false;
+  }
+
+  cloudinary.config({
+    cloud_name: config.cloudName,
+    api_key: config.apiKey,
+    api_secret: config.apiSecret,
+    secure: true,
+  });
+
+  return true;
+};
+
+// Export configured cloudinary instance
 export { cloudinary };
 
 /**
@@ -33,13 +48,17 @@ export async function uploadImageFromBase64(
   publicId?: string
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
-    // Validate Cloudinary configuration before attempting upload
-    if (!cloudName || !apiKey || !apiSecret) {
+    // Configure Cloudinary before attempting upload (lazy initialization)
+    const config = getCloudinaryConfig();
+    if (!config) {
       return {
         success: false,
-        error: 'Cloudinary configuration is incomplete. Please check your environment variables (NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) and restart the server.',
+        error: 'Cloudinary configuration is incomplete. Please check your environment variables (NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) in your Vercel project settings.',
       };
     }
+
+    // Ensure Cloudinary is configured
+    configureCloudinary();
 
     // Remove data URL prefix if present
     const base64String = base64Data.includes(',')
@@ -70,7 +89,7 @@ export async function uploadImageFromBase64(
     let errorMessage = 'Failed to upload image to Cloudinary';
     
     if (error?.http_code === 401) {
-      errorMessage = 'Cloudinary authentication failed. Please check your API credentials (CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET) in your .env.local file and restart the server.';
+      errorMessage = 'Cloudinary authentication failed. Please check your API credentials (CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET) in your Vercel project settings → Environment Variables.';
     } else if (error?.message) {
       errorMessage = error.message;
     } else if (error instanceof Error) {

@@ -6,10 +6,10 @@ const getMongoUri = (): string => {
 
   if (!rawUri) {
     throw new Error(
-      "MONGODB_URI is not set. Please create a .env.local file in the root directory with:\n" +
-      "MONGODB_URI=mongodb://localhost:27017/madeenajuba\n" +
-      "Or for MongoDB Atlas:\n" +
-      "MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/madeenajuba?retryWrites=true&w=majority"
+      "MONGODB_URI is not set. Please add it to your environment variables:\n" +
+      "For local development: Create a .env.local file with MONGODB_URI=mongodb://localhost:27017/madeenajuba\n" +
+      "For Vercel: Add MONGODB_URI in your Vercel project settings → Environment Variables\n" +
+      "MongoDB Atlas example: mongodb+srv://username:password@cluster.mongodb.net/madeenajuba?retryWrites=true&w=majority"
     );
   }
 
