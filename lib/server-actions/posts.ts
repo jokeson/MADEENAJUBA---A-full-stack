@@ -178,7 +178,7 @@ export async function getPostById(postId: string) {
     const kyc = await kycCollection.findOne({ userId: post.authorUserId });
 
     // Get avatar from KYC documents (use id_front if available)
-    const avatarDoc = kyc?.documents?.find((doc) => doc.type === "id_front") || kyc?.documents?.[0];
+    const avatarDoc = kyc?.documents?.find((doc: { type: string; url: string; uploadedAt: Date }) => doc.type === "id_front") || kyc?.documents?.[0];
 
     const formattedPost = {
       id: post._id?.toString() || "",
@@ -328,7 +328,7 @@ export async function getPostComments(postId: string) {
         const kyc = await kycCollection.findOne({ userId: comment.authorUserId });
 
         // Get avatar from KYC documents (use id_front if available)
-        const avatarDoc = kyc?.documents?.find((doc) => doc.type === "id_front") || kyc?.documents?.[0];
+        const avatarDoc = kyc?.documents?.find((doc: { type: string; url: string; uploadedAt: Date }) => doc.type === "id_front") || kyc?.documents?.[0];
 
         return {
           id: comment._id?.toString() || "",
@@ -440,7 +440,7 @@ export async function getAllPostsForAdmin() {
       posts.map(async (post) => {
         const author = await usersCollection.findOne({ _id: post.authorUserId });
         const kyc = await kycCollection.findOne({ userId: post.authorUserId });
-        const avatarDoc = kyc?.documents?.find((doc) => doc.type === "id_front") || kyc?.documents?.[0];
+        const avatarDoc = kyc?.documents?.find((doc: { type: string; url: string; uploadedAt: Date }) => doc.type === "id_front") || kyc?.documents?.[0];
 
         return {
           id: post._id?.toString() || "",
@@ -628,7 +628,7 @@ export async function getPostCommentsWithReplies(postId: string) {
       allComments.map(async (comment) => {
         const author = await usersCollection.findOne({ _id: comment.authorUserId });
         const kyc = await kycCollection.findOne({ userId: comment.authorUserId });
-        const avatarDoc = kyc?.documents?.find((doc) => doc.type === "id_front") || kyc?.documents?.[0];
+        const avatarDoc = kyc?.documents?.find((doc: { type: string; url: string; uploadedAt: Date }) => doc.type === "id_front") || kyc?.documents?.[0];
 
         return {
           id: comment._id?.toString() || "",
