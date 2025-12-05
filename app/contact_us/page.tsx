@@ -24,6 +24,7 @@ export default function ContactUs() {
           <p className="text-xs xs:text-sm text-gray-600">
             We typically respond within 24-48 hours during business days.
           </p>
+          {/* Contact form system - deployed */}
         </div>
       </div>
     </div>
