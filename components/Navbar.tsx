@@ -123,8 +123,8 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Right Side - Action Buttons or Profile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-            {/* Notification Bell - Only shown when authenticated */}
-            {isAuthenticated && <NotificationBell />}
+            {/* Notification Bell - Only shown when authenticated - Hidden on mobile */}
+            {isAuthenticated && <div className="hidden md:block"><NotificationBell /></div>}
 
             {/* Action Buttons - Desktop - Hidden when authenticated */}
             {!isAuthenticated && (
