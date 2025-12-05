@@ -4,7 +4,7 @@ import EventsSection from "../../components/EventsSection";
 
 export default function Home() {
   return (
-    <div>
+    <div className="w-full overflow-x-hidden">
       <Hero />
       <CertificationsAwards />
       <EventsSection />

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -35,12 +35,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MADEENAJUBA - City Portal",
   description: "MADEENAJUBA is a comprehensive city portal that seamlessly integrates multiple services into a single authenticated web application.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   other: {
     "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
     "Pragma": "no-cache",
     "Expires": "0",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -57,10 +62,9 @@ export default function RootLayout({
         <ToastProvider />
         <AuthProvider>
           <NavbarWrapper />
-          <main>
-          {children}
+          <main className="w-full overflow-x-hidden">
+            {children}
           </main>
-        
         </AuthProvider>
       </body>
     </html>

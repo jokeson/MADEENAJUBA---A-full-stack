@@ -10,7 +10,7 @@ const EventsSection = async () => {
   const displayEvents = events.slice(0, 6);
 
   return (
-    <section className="relative bg-[#f5f5f0] py-6 xs:py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20 overflow-hidden">
+    <section className="relative w-full bg-[#f5f5f0] py-6 xs:py-8 sm:py-10 md:py-12 lg:py-16 xl:py-20 overflow-x-hidden">
       {/* Decorative background elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-0 left-0 w-64 xs:w-80 sm:w-96 h-64 xs:h-80 sm:h-96 bg-[#800000] rounded-full blur-3xl"></div>
