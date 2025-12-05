@@ -199,6 +199,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Mobile Menu Button and Notification Bell - Visible only on mobile */}
           <div className="md:hidden flex items-center gap-2 absolute right-0">
+            {/* Notification Bell - Only shown when authenticated on mobile */}
             {isAuthenticated && <NotificationBell />}
             <button
               onClick={toggleMobileMenu}
