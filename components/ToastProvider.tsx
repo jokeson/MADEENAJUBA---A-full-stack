@@ -18,7 +18,7 @@ const ToastProvider = () => {
         },
         success: {
           iconTheme: {
-            primary: "#800000",
+            primary: "#10b981", // Green color for success icon
             secondary: "#fff",
           },
         },

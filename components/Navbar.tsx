@@ -87,7 +87,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
           {/* Navigation Links - Desktop - Always centered */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 absolute left-1/2 transform -translate-x-1/2">
             <Link href="/" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/news") ? "border-b-2 border-[#800000]" : ""}`}>
-              home
+             Home
 
             </Link>
             <Link href="/events" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/events") ? "border-b-2 border-[#800000]" : ""}`}>
@@ -96,11 +96,11 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
             <Link href="/jobs" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/jobs") ? "border-b-2 border-[#800000]" : ""}`}>
               Jobs
             </Link>
-            <Link href="/ads" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/ads") ? "border-b-2 border-[#800000]" : ""}`}>
-              Ads
+            <Link href="/about_us" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/ads") ? "border-b-2 border-[#800000]" : ""}`}>
+              About Us
             </Link>
-            <Link href="/businesses" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/businesses") ? "border-b-2 border-[#800000]" : ""}`}>
-              Businesses
+            <Link href="/contact_us" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/businesses") ? "border-b-2 border-[#800000]" : ""}`}>
+              Contact Us
             </Link>
             {isAuthenticated ? (
               <Link href="/wallet" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/wallet") ? "border-b-2 border-[#800000]" : ""}`}>

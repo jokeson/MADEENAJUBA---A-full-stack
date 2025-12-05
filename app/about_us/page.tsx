@@ -1,4 +1,4 @@
-export default function AdsPage() {
+export default function AboutUs() {
   return (
     <div className="min-h-screen bg-[#f5f5f0]">
       <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-6 xs:py-8 sm:py-10 md:py-12 lg:py-16">

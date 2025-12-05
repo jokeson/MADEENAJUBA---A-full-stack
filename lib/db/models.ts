@@ -223,6 +223,22 @@ export interface NotificationModel {
   createdAt: Date;
 }
 
+// Contact Message Model
+export interface ContactMessageModel {
+  _id?: ObjectId;
+  userId?: ObjectId; // Optional - only if user is authenticated
+  email: string; // Required - from user if authenticated, from form if not
+  phone?: string; // Optional - from KYC if authenticated, from form if not
+  subject: string; // Required
+  message: string; // Required
+  status: "new" | "read" | "replied" | "archived"; // Message status
+  readAt?: Date; // When admin read the message
+  readBy?: ObjectId; // Admin who read the message
+  repliedAt?: Date; // When admin replied
+  repliedBy?: ObjectId; // Admin who replied
+  createdAt: Date;
+}
+
 // Collection names constants
 export const COLLECTIONS = {
   USERS: "users",
@@ -239,5 +255,6 @@ export const COLLECTIONS = {
   POSTS: "posts",
   COMMENTS: "comments",
   NOTIFICATIONS: "notifications",
+  CONTACT_MESSAGES: "contact_messages",
 } as const;
 
