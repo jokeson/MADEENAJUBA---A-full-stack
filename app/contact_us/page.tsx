@@ -14,11 +14,13 @@ export default function ContactUs() {
           </p>
         </div>
 
+ 
         {/* Contact Form */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-6 xs:p-8 sm:p-10 md:p-12">
           <ContactForm />
         </div>
 
+ 
         {/* Additional Info */}
         <div className="mt-8 xs:mt-10 sm:mt-12 text-center">
           <p className="text-xs xs:text-sm text-gray-600">

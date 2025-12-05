@@ -37,6 +37,7 @@ const ContactForm = () => {
           }
         } catch (error) {
           console.error("Error loading user info:", error);
+          // Silently fail - user can still fill form manually
         } finally {
           setLoadingUserInfo(false);
         }
@@ -83,7 +84,12 @@ const ContactForm = () => {
       }
     } catch (error) {
       console.error("Error submitting contact form:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      // Handle server action not found error (deployment mismatch)
+      if (error instanceof Error && error.message.includes("Failed to find Server Action")) {
+        toast.error("The form is being updated. Please refresh the page and try again.");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
