@@ -1,3 +1,8 @@
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 import { getEvents } from "../../lib/server-actions/events";
 import EventCard from "../../components/cards/EventCard";
 

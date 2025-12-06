@@ -18,6 +18,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Disable static optimization to ensure fresh content on every request
+  experimental: {
+    // Force dynamic rendering for all routes
+    isrMemoryCacheSize: 0,
+  },
+  // Disable build cache to ensure fresh builds
+  onDemandEntries: {
+    maxInactiveAge: 0,
+    pagesBufferLength: 0,
+  },
   async headers() {
     return [
       {
@@ -25,7 +35,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: "Cache-Control",
-            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
           },
           {
             key: "Pragma",
@@ -34,6 +44,10 @@ const nextConfig: NextConfig = {
           {
             key: "Expires",
             value: "0",
+          },
+          {
+            key: "X-Vercel-Cache",
+            value: "MISS",
           },
         ],
       },

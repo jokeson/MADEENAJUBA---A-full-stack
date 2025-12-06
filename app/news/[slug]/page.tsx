@@ -1,3 +1,8 @@
+// Force dynamic rendering to prevent caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 import { getPostById } from "@/lib/server-actions/posts";
 import NewsDetailClient from "@/components/news/NewsDetailClient";
 import Image from "next/image";
