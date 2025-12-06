@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { User, getSession, signIn, signUp, signOut as authSignOut } from "@/lib/auth";
 
 interface AuthContextType {
@@ -43,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const result = await signIn(email, password);
     if (result.success && result.user) {
       setUser(result.user);
+      toast.success("Signed in successfully!");
       router.push("/dashboard");
     }
     return { success: result.success, message: result.message };
@@ -63,6 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleSignOut = () => {
     authSignOut();
     setUser(null);
+    toast.success("Signed out successfully!");
     // Navigate to home page after sign out
     router.push("/");
   };
