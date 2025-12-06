@@ -48,10 +48,6 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
-// Force all routes to be dynamic to prevent full route cache
-// This ensures all pages are rendered on-demand and not statically cached
-export const dynamic = 'force-dynamic';
-
 export default function RootLayout({
   children,
 }: Readonly<{
