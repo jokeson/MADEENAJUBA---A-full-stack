@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { isAdmin } from "@/lib/rbac";
+import { userHasMessages } from "@/lib/server-actions/user-messages";
 
 const Sidebar = () => {
   const router = useRouter();
@@ -11,6 +12,9 @@ const Sidebar = () => {
   const { user, signOut } = useAuth();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+  const [hasMessages, setHasMessages] = useState(false);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [loadingMessages, setLoadingMessages] = useState(true);
 
   const handleSignOut = (e?: React.MouseEvent | React.TouchEvent) => {
     // Prevent event bubbling
@@ -145,6 +149,38 @@ const Sidebar = () => {
       ),
     },
     
+    // Messages link - only show if user has messages (and not admin)
+    ...(user && !isAdmin(user.role) && hasMessages
+      ? [
+          {
+            label: "Messages",
+            href: "/messages",
+            icon: (
+              <div className="relative">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+                {unreadMessageCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+                  </span>
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
+    
     ...(user && isAdmin(user.role)
       ? [
           {
@@ -250,6 +286,49 @@ const Sidebar = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Check if user has messages (only for non-admin users)
+  useEffect(() => {
+    const checkMessages = async () => {
+      if (!user?.id || isAdmin(user.role)) {
+        setHasMessages(false);
+        setUnreadMessageCount(0);
+        setLoadingMessages(false);
+        return;
+      }
+
+      try {
+        setLoadingMessages(true);
+        const result = await userHasMessages(user.id);
+        if (result.success) {
+          setHasMessages(result.hasMessages);
+          setUnreadMessageCount(result.unreadCount);
+        }
+      } catch (error) {
+        console.error("Error checking messages:", error);
+        setHasMessages(false);
+        setUnreadMessageCount(0);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+
+    checkMessages();
+
+    // Refresh every 30 seconds to check for new messages
+    const interval = setInterval(checkMessages, 30000);
+
+    // Also refresh when window regains focus
+    const handleFocus = () => {
+      checkMessages();
+    };
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [user?.id, user?.role]);
 
   return (
     <>

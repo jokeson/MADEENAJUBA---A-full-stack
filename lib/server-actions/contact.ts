@@ -2,8 +2,9 @@
 
 import { ObjectId } from "mongodb";
 import { getCollection } from "@/lib/db";
-import { COLLECTIONS, ContactMessageModel, KycModel } from "@/lib/db/models";
+import { COLLECTIONS, ContactMessageModel, KycModel, UserModel } from "@/lib/db/models";
 import { getUserById } from "@/lib/db/utils";
+import { createNotification } from "./notifications";
 
 /**
  * Get user contact information (email and phone) if authenticated
@@ -101,6 +102,40 @@ export async function submitContactMessage(data: {
     const result = await contactCollection.insertOne(contactMessage);
 
     if (result.insertedId) {
+      // Notify all admin users about the new contact message
+      try {
+        const usersCollection = await getCollection<UserModel>(COLLECTIONS.USERS);
+        const adminUsers = await usersCollection
+          .find({ role: "admin" })
+          .toArray();
+
+        // Create notifications for all admins
+        const notificationPromises = adminUsers.map((admin) => {
+          if (admin._id) {
+            return createNotification({
+              userId: admin._id.toString(),
+              type: "contact_message",
+              title: "New Contact Message",
+              message: `New message from ${data.email}: ${data.subject}`,
+              link: "/admin?tab=messages",
+              meta: {
+                contactMessageId: result.insertedId.toString(),
+              },
+            });
+          }
+          return Promise.resolve({ success: false });
+        });
+
+        // Send notifications in parallel (don't wait for them to complete)
+        Promise.all(notificationPromises).catch((err) => {
+          console.error("Error creating notifications for admins:", err);
+          // Don't fail the contact message submission if notifications fail
+        });
+      } catch (err) {
+        console.error("Error notifying admins:", err);
+        // Don't fail the contact message submission if notifications fail
+      }
+
       return {
         success: true,
         messageId: result.insertedId.toString(),
@@ -154,6 +189,99 @@ export async function getAllContactMessages() {
       success: false,
       error: error instanceof Error ? error.message : "Failed to get contact messages",
       messages: [],
+    };
+  }
+}
+
+/**
+ * Update contact message status (Admin only)
+ */
+export async function updateMessageStatus(
+  messageId: string,
+  status: "read" | "replied" | "archived",
+  adminUserId?: string
+) {
+  try {
+    if (!messageId || !ObjectId.isValid(messageId)) {
+      return { success: false, error: "Invalid message ID" };
+    }
+
+    const contactCollection = await getCollection<ContactMessageModel>(
+      COLLECTIONS.CONTACT_MESSAGES
+    );
+
+    const updateData: Partial<ContactMessageModel> = {
+      status,
+    };
+
+    // Set readAt and readBy if marking as read or replied
+    if (status === "read" || status === "replied") {
+      updateData.readAt = new Date();
+      if (adminUserId && ObjectId.isValid(adminUserId)) {
+        updateData.readBy = new ObjectId(adminUserId);
+      }
+    }
+
+    // Set repliedAt and repliedBy if marking as replied
+    if (status === "replied") {
+      updateData.repliedAt = new Date();
+      if (adminUserId && ObjectId.isValid(adminUserId)) {
+        updateData.repliedBy = new ObjectId(adminUserId);
+      }
+    }
+
+    const result = await contactCollection.updateOne(
+      { _id: new ObjectId(messageId) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return { success: false, error: "Message not found" };
+    }
+
+    return {
+      success: true,
+      message: `Message marked as ${status}`,
+    };
+  } catch (error) {
+    console.error("Error updating message status:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update message status",
+    };
+  }
+}
+
+/**
+ * Delete contact message (Admin only)
+ */
+export async function deleteContactMessage(messageId: string) {
+  try {
+    if (!messageId || !ObjectId.isValid(messageId)) {
+      return { success: false, error: "Invalid message ID" };
+    }
+
+    const contactCollection = await getCollection<ContactMessageModel>(
+      COLLECTIONS.CONTACT_MESSAGES
+    );
+
+    const result = await contactCollection.deleteOne({
+      _id: new ObjectId(messageId),
+    });
+
+    if (result.deletedCount === 0) {
+      return { success: false, error: "Message not found" };
+    }
+
+    return {
+      success: true,
+      message: "Message deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting contact message:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete message",
     };
   }
 }

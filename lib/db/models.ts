@@ -209,7 +209,7 @@ export interface CommentModel {
 export interface NotificationModel {
   _id?: ObjectId;
   userId: ObjectId; // User who receives the notification
-  type: "transaction" | "post" | "event_approval" | "message";
+  type: "transaction" | "post" | "event_approval" | "message" | "contact_message";
   title: string; // Notification title
   message: string; // Notification message
   read: boolean; // Whether the notification has been read
@@ -219,6 +219,7 @@ export interface NotificationModel {
     postId?: ObjectId;
     eventId?: ObjectId;
     messageId?: ObjectId;
+    contactMessageId?: ObjectId;
   };
   createdAt: Date;
 }
@@ -239,6 +240,21 @@ export interface ContactMessageModel {
   createdAt: Date;
 }
 
+// User Message Model (Admin to User messages)
+export interface UserMessageModel {
+  _id?: ObjectId;
+  userId: ObjectId; // User who receives the message
+  senderId?: ObjectId; // Admin who sent the message (optional, for tracking)
+  senderEmail?: string; // Admin email (for display purposes)
+  subject: string; // Message subject
+  message: string; // Message content
+  read: boolean; // Whether user has read the message
+  readAt?: Date; // When user read the message
+  deletedByUser: boolean; // Whether user deleted the message
+  deletedByAdmin: boolean; // Whether admin deleted the message
+  createdAt: Date;
+}
+
 // Collection names constants
 export const COLLECTIONS = {
   USERS: "users",
@@ -256,5 +272,6 @@ export const COLLECTIONS = {
   COMMENTS: "comments",
   NOTIFICATIONS: "notifications",
   CONTACT_MESSAGES: "contact_messages",
+  USER_MESSAGES: "user_messages",
 } as const;
 

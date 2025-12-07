@@ -10,7 +10,7 @@
  * - icon: Emoji icon displayed next to the label
  */
 
-export type AdminTabId = "statistics" | "users" | "wallets" | "fees" | "redeem" | "kyc" | "control" | "permission";
+export type AdminTabId = "statistics" | "users" | "wallets" | "fees" | "redeem" | "kyc" | "control" | "permission" | "messages";
 
 export interface AdminTab {
   id: AdminTabId;
@@ -71,6 +71,12 @@ export const ADMIN_TABS: AdminTab[] = [
     label: "Permission",
     icon: "🔐",
     description: "Manage user permissions and access control",
+  },
+  {
+    id: "messages",
+    label: "Contact Messages",
+    icon: "📧",
+    description: "View and manage contact form messages",
   },
 ];
 

@@ -28,6 +28,7 @@ import KycReviewDrawer from "./KycReviewDrawer";
 import Statistics from "./Statistics";
 import Control from "./Control";
 import Permission from "./Permission";
+import ContactMessages from "./ContactMessages";
 
 interface AdminTabContentProps {
   activeTab: AdminTabId;
@@ -73,6 +74,10 @@ const AdminTabContent = ({ activeTab, onKycNotificationRefresh, onEventNotificat
       case "permission":
         // Permission management: manage user permissions and access control
         return <Permission onNotificationRefresh={onEventNotificationRefresh} />;
+
+      case "messages":
+        // Contact messages: view and manage contact form messages
+        return <ContactMessages />;
 
       default:
         // Fallback to statistics if unknown tab

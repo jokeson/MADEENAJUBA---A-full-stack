@@ -40,6 +40,7 @@ export async function getUserNotifications(userId: string) {
             postId: notification.meta.postId?.toString(),
             eventId: notification.meta.eventId?.toString(),
             messageId: notification.meta.messageId?.toString(),
+            contactMessageId: notification.meta.contactMessageId?.toString(),
           }
         : undefined,
     }));
@@ -163,7 +164,7 @@ export async function markAllNotificationsAsRead(userId: string) {
  */
 export async function createNotification(data: {
   userId: string;
-  type: "transaction" | "post" | "event_approval" | "message";
+  type: "transaction" | "post" | "event_approval" | "message" | "contact_message";
   title: string;
   message: string;
   link?: string;
@@ -172,6 +173,7 @@ export async function createNotification(data: {
     postId?: string;
     eventId?: string;
     messageId?: string;
+    contactMessageId?: string;
   };
 }) {
   try {
@@ -198,6 +200,9 @@ export async function createNotification(data: {
             postId: data.meta.postId ? new ObjectId(data.meta.postId) : undefined,
             eventId: data.meta.eventId ? new ObjectId(data.meta.eventId) : undefined,
             messageId: data.meta.messageId ? new ObjectId(data.meta.messageId) : undefined,
+            contactMessageId: data.meta.contactMessageId
+              ? new ObjectId(data.meta.contactMessageId)
+              : undefined,
           }
         : undefined,
       createdAt: new Date(),
