@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NavbarWrapper from "@/components/NavbarWrapper";
 import ErrorSuppressor from "@/components/ErrorSuppressor";
+import ServerActionErrorHandler from "@/components/ServerActionErrorHandler";
 import ToastProvider from "@/components/ToastProvider";
 
 /**
@@ -59,6 +60,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ErrorSuppressor />
+        <ServerActionErrorHandler />
         <ToastProvider />
         <AuthProvider>
           <NavbarWrapper />

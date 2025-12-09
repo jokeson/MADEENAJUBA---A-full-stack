@@ -58,6 +58,7 @@ const ErrorSuppressor = () => {
     const handleError = (event: ErrorEvent) => {
       const errorMessage = event.message || "";
       
+      // Suppress browser extension errors
       if (
         errorMessage.includes("runtime.lastError") ||
         errorMessage.includes("message port closed") ||
@@ -66,12 +67,22 @@ const ErrorSuppressor = () => {
         event.preventDefault();
         return false;
       }
+      
+      // Suppress Server Action errors (handled by ServerActionErrorHandler)
+      if (
+        errorMessage.includes("Failed to find Server Action") ||
+        errorMessage.includes("failed-to-find-server-action")
+      ) {
+        // Let ServerActionErrorHandler handle this
+        return;
+      }
     };
 
     // Also handle unhandled promise rejections
     const handleRejection = (event: PromiseRejectionEvent) => {
       const errorMessage = event.reason?.message || String(event.reason) || "";
       
+      // Suppress browser extension errors
       if (
         errorMessage.includes("runtime.lastError") ||
         errorMessage.includes("message port closed") ||
@@ -79,6 +90,15 @@ const ErrorSuppressor = () => {
       ) {
         event.preventDefault();
         return false;
+      }
+      
+      // Suppress Server Action errors (handled by ServerActionErrorHandler)
+      if (
+        errorMessage.includes("Failed to find Server Action") ||
+        errorMessage.includes("failed-to-find-server-action")
+      ) {
+        // Let ServerActionErrorHandler handle this
+        return;
       }
     };
 
