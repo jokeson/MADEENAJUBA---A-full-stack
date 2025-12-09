@@ -6,6 +6,18 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
+import { 
+  LogOut, 
+  X, 
+  Menu, 
+  Newspaper, 
+  Calendar, 
+  Briefcase, 
+  Megaphone, 
+  Building2, 
+  Wallet, 
+  LayoutDashboard 
+} from "lucide-react";
 
 interface NavbarProps {
   onOpenLoginModal: () => void;
@@ -185,19 +197,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                       tabIndex={0}
                       aria-label="Sign out"
                     >
-                      <svg
-                        className="w-4 h-4 flex-shrink-0 text-red-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                        />
-                      </svg>
+                      <LogOut className="w-4 h-4 flex-shrink-0 text-red-500" />
                       <span className="text-red-500">Sign Out</span>
                     </button>
                   </div>
@@ -217,33 +217,9 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
               tabIndex={0}
             >
             {isMobileMenuOpen ? (
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="w-6 h-6" />
             ) : (
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <Menu className="w-6 h-6" />
             )}
             </button>
           </div>
@@ -280,9 +256,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/news") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                </svg>
+                <Newspaper className="w-5 h-5 flex-shrink-0" />
                 News
               </Link>
               <Link 
@@ -290,9 +264,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/events") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <Calendar className="w-5 h-5 flex-shrink-0" />
                 Events
               </Link>
               <Link 
@@ -300,9 +272,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/jobs") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                <Briefcase className="w-5 h-5 flex-shrink-0" />
                 Jobs
               </Link>
               <Link 
@@ -310,9 +280,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/ads") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                </svg>
+                <Megaphone className="w-5 h-5 flex-shrink-0" />
                 Ads
               </Link>
               <Link 
@@ -320,9 +288,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/businesses") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+                <Building2 className="w-5 h-5 flex-shrink-0" />
                 Businesses
               </Link>
               {isAuthenticated ? (
@@ -332,9 +298,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                     className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/wallet") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                     onClick={closeMobileMenu}
                   >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
+                    <Wallet className="w-5 h-5 flex-shrink-0" />
                     Wallet
                   </Link>
                   <Link 
@@ -342,9 +306,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                     className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/dashboard") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                     onClick={closeMobileMenu}
                   >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
+                    <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
                     Dashboard
                   </Link>
                 </>
@@ -356,9 +318,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                   }}
                   className="flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg text-left w-full"
                 >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
+                  <Wallet className="w-5 h-5 flex-shrink-0" />
                   Wallet
                 </button>
               )}
