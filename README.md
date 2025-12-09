@@ -1,4 +1,4 @@
-# MADEENAJUBA
+# MADEENAJUBA---A-full-stack
 
 A full-stack web application built with Next.js that connects residents, visitors, and communities through a central digital hub with integrated e-wallet functionality.
 
