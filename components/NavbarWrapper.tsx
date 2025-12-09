@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "./Navbar";
 import SignUpModal from "./SignUpModal";
 import LoginModal from "./LoginModal";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 /**
  * NavbarWrapper Component
@@ -15,6 +16,8 @@ const NavbarWrapper = () => {
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   // State to control the visibility of the login modal
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  // State to control the visibility of the forgot password modal
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
 
   /**
    * Opens the sign up modal by setting its state to true.
@@ -49,12 +52,13 @@ const NavbarWrapper = () => {
   };
 
   /**
-   * Switches from sign up modal to login modal.
-   * Closes the sign up modal and opens the login modal.
-   * Called when user clicks "Login" link in the sign up modal.
+   * Switches to login modal from any other modal.
+   * Closes all other modals and opens the login modal.
+   * Called when user clicks "Login" link in sign up or forgot password modals.
    */
   const handleSwitchToLogin = () => {
     setIsSignUpModalOpen(false);
+    setIsForgotPasswordModalOpen(false);
     setIsLoginModalOpen(true);
   };
 
@@ -66,6 +70,22 @@ const NavbarWrapper = () => {
   const handleSwitchToSignUp = () => {
     setIsLoginModalOpen(false);
     setIsSignUpModalOpen(true);
+  };
+
+  /**
+   * Opens the forgot password modal by setting its state to true.
+   * Called when user clicks "Forgot password?" link in the login modal.
+   */
+  const handleOpenForgotPasswordModal = () => {
+    setIsForgotPasswordModalOpen(true);
+  };
+
+  /**
+   * Closes the forgot password modal by setting its state to false.
+   * Called when user closes the forgot password modal (via close button or backdrop click).
+   */
+  const handleCloseForgotPasswordModal = () => {
+    setIsForgotPasswordModalOpen(false);
   };
 
   return (
@@ -83,6 +103,12 @@ const NavbarWrapper = () => {
         isOpen={isLoginModalOpen}
         onClose={handleCloseLoginModal}
         onSwitchToSignUp={handleSwitchToSignUp}
+        onSwitchToForgotPassword={handleOpenForgotPasswordModal}
+      />
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordModalOpen}
+        onClose={handleCloseForgotPasswordModal}
+        onSwitchToLogin={handleSwitchToLogin}
       />
     </>
   );

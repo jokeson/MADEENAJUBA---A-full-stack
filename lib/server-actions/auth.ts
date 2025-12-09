@@ -2,7 +2,7 @@
 
 import { getUserByEmail, createUser } from "@/lib/db/utils";
 import { COLLECTIONS } from "@/lib/db/models";
-import type { UserModel } from "@/lib/db/models";
+import type { UserModel, PasswordResetTokenModel } from "@/lib/db/models";
 import { getCollection } from "@/lib/db";
 import { ObjectId } from "mongodb";
 import crypto from "crypto";
@@ -221,6 +221,178 @@ export async function signUpWithRole(
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to sign up",
+    };
+  }
+}
+
+/**
+ * Request password reset - generates a token and sends email
+ */
+export async function requestPasswordReset(email: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return { success: false, message: "Invalid email format" };
+    }
+
+    // Find user by email
+    const user = await getUserByEmail(email.toLowerCase());
+    if (!user || !user._id) {
+      // Don't reveal if user exists or not for security
+      return { success: true, message: "If an account exists with this email, a password reset link has been sent." };
+    }
+
+    // Generate secure token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1); // Token expires in 1 hour
+
+    // Invalidate any existing tokens for this user
+    const tokensCollection = await getCollection<PasswordResetTokenModel>(
+      COLLECTIONS.PASSWORD_RESET_TOKENS
+    );
+    await tokensCollection.updateMany(
+      { userId: user._id, used: false },
+      { $set: { used: true } }
+    );
+
+    // Create new reset token
+    const resetToken: Omit<PasswordResetTokenModel, "_id"> = {
+      userId: user._id,
+      token,
+      expiresAt,
+      used: false,
+      createdAt: new Date(),
+    };
+
+    await tokensCollection.insertOne(resetToken);
+
+    // Send email with reset link
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/reset-password?token=${token}`;
+    
+    // Import email utility dynamically to avoid issues if email is not configured
+    try {
+      const { sendPasswordResetEmail } = await import("@/lib/utils/email");
+      await sendPasswordResetEmail(user.email, resetUrl);
+    } catch (emailError) {
+      console.error("Error sending email:", emailError);
+      // For development, log the reset URL
+      if (process.env.NODE_ENV === "development") {
+        console.log("Password reset URL (dev only):", resetUrl);
+      }
+    }
+
+    return { success: true, message: "If an account exists with this email, a password reset link has been sent." };
+  } catch (error) {
+    console.error("Request password reset error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to process password reset request",
+    };
+  }
+}
+
+/**
+ * Verify password reset token
+ */
+export async function verifyPasswordResetToken(token: string): Promise<{ success: boolean; message?: string; userId?: string }> {
+  try {
+    if (!token || token.trim().length === 0) {
+      return { success: false, message: "Invalid reset token" };
+    }
+
+    const tokensCollection = await getCollection<PasswordResetTokenModel>(
+      COLLECTIONS.PASSWORD_RESET_TOKENS
+    );
+
+    const resetToken = await tokensCollection.findOne({
+      token: token.trim(),
+      used: false,
+    });
+
+    if (!resetToken) {
+      return { success: false, message: "Invalid or expired reset token" };
+    }
+
+    // Check if token has expired
+    if (new Date() > resetToken.expiresAt) {
+      return { success: false, message: "Reset token has expired" };
+    }
+
+    return {
+      success: true,
+      userId: resetToken.userId.toString(),
+    };
+  } catch (error) {
+    console.error("Verify password reset token error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to verify reset token",
+    };
+  }
+}
+
+/**
+ * Reset password using token
+ */
+export async function resetPassword(
+  token: string,
+  newPassword: string
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    // Validate password
+    if (!newPassword || newPassword.length < 8 || newPassword.length > 25) {
+      return { success: false, message: "Password must be 8 to 25 characters" };
+    }
+
+    // Verify token
+    const tokenVerification = await verifyPasswordResetToken(token);
+    if (!tokenVerification.success || !tokenVerification.userId) {
+      return { success: false, message: tokenVerification.message || "Invalid or expired reset token" };
+    }
+
+    const userId = tokenVerification.userId;
+
+    // Hash new password
+    const hashedPassword = hashPassword(newPassword);
+
+    // Update user password
+    const usersCollection = await getCollection<UserModel>(COLLECTIONS.USERS);
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          password: hashedPassword,
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return { success: false, message: "User not found" };
+    }
+
+    // Mark token as used
+    const tokensCollection = await getCollection<PasswordResetTokenModel>(
+      COLLECTIONS.PASSWORD_RESET_TOKENS
+    );
+    await tokensCollection.updateOne(
+      { token: token.trim() },
+      {
+        $set: {
+          used: true,
+          usedAt: new Date(),
+        },
+      }
+    );
+
+    return { success: true, message: "Password has been reset successfully" };
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to reset password",
     };
   }
 }

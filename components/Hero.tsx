@@ -76,16 +76,12 @@ const Hero = () => {
 
   return (
     <>
-      {/* Responsive background size styles - contain on mobile, cover on larger screens */}
+      {/* Responsive background size styles - cover on all screen sizes */}
       <style dangerouslySetInnerHTML={{
         __html: `
           .hero-section-mobile {
-            background-size: contain !important;
-          }
-          @media (min-width: 640px) {
-            .hero-section-mobile {
-              background-size: cover !important;
-            }
+            background-size: cover !important;
+            background-position: center !important;
           }
         `
       }} />

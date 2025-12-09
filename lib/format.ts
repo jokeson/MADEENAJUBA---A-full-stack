@@ -68,11 +68,25 @@ export function formatRelativeTime(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  const diffInHours = Math.floor(diffInSeconds / 3600);
+  const diffInDays = Math.floor(diffInSeconds / 86400);
+  const diffInWeeks = Math.floor(diffInDays / 7);
+  const diffInMonths = Math.floor(diffInDays / 30);
   
-  if (diffInSeconds < 60) return "just now";
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  if (diffInSeconds < 60) return "now";
+  if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
+  if (diffInHours === 1) return "1hrs ago";
+  if (diffInHours === 12) return "12hrs";
+  if (diffInHours === 20) return "20hrs ago";
+  if (diffInHours < 24) return `${diffInHours}hrs ago`;
+  if (diffInDays === 1) return "1 day ago";
+  if (diffInDays === 5) return "5 days ago";
+  if (diffInDays < 7) return `${diffInDays} days ago`;
+  if (diffInWeeks === 1) return "1 week";
+  if (diffInWeeks < 4) return `${diffInWeeks} weeks ago`;
+  if (diffInMonths === 1) return "1 month ago";
+  if (diffInMonths < 12) return `${diffInMonths} months ago`;
   
   return formatDate(d);
 }

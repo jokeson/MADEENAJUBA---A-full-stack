@@ -2,7 +2,7 @@
 
 import { getCollection } from "@/lib/db";
 import { COLLECTIONS } from "@/lib/db/models";
-import type { UserModel, RedeemCodeModel, FeeModel, TransactionModel, KycModel, PendingWithdrawalModel } from "@/lib/db/models";
+import type { UserModel, RedeemCodeModel, FeeModel, TransactionModel, KycModel, PendingWithdrawalModel, RedeemCardModel } from "@/lib/db/models";
 import { updateUser } from "@/lib/db/utils";
 import { ObjectId } from "mongodb";
 
@@ -496,6 +496,228 @@ export async function deleteRedeemCodes(codeIds: string[], adminUserId: string) 
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to delete redeem codes",
+    };
+  }
+}
+
+/**
+ * Generate cards from redeem codes (Admin only)
+ * 
+ * Creates physical card representations of redeem codes with 16-digit card numbers.
+ * Cards are styled like master cards and displayed in the Cards tab.
+ * 
+ * @param redeemCodeIds - Array of redeem code IDs to generate cards for
+ * @param adminUserId - ID of the admin generating the cards
+ * @returns Success status with generated cards data
+ */
+export async function generateCardsFromRedeemCodes(
+  redeemCodeIds: string[],
+  adminUserId: string
+) {
+  try {
+    if (!Array.isArray(redeemCodeIds) || redeemCodeIds.length === 0) {
+      return { success: false, error: "No redeem codes selected for card generation" };
+    }
+
+    if (!ObjectId.isValid(adminUserId)) {
+      return { success: false, error: "Invalid admin user ID" };
+    }
+
+    // Verify admin role
+    const usersCollection = await getCollection<UserModel>(COLLECTIONS.USERS);
+    const admin = await usersCollection.findOne({ _id: new ObjectId(adminUserId) });
+
+    if (!admin || admin.role !== "admin") {
+      return { success: false, error: "Unauthorized: Admin access required" };
+    }
+
+    // Validate all code IDs
+    const validIds = redeemCodeIds.filter((id) => ObjectId.isValid(id));
+    if (validIds.length === 0) {
+      return { success: false, error: "No valid redeem code IDs provided" };
+    }
+
+    // Convert to ObjectIds
+    const objectIds = validIds.map((id) => new ObjectId(id));
+
+    // Get redeem codes
+    const redeemCodesCollection = await getCollection<RedeemCodeModel>(
+      COLLECTIONS.REDEEM_CODES
+    );
+    const redeemCodes = await redeemCodesCollection
+      .find({ _id: { $in: objectIds } })
+      .toArray();
+
+    if (redeemCodes.length === 0) {
+      return { success: false, error: "No redeem codes found" };
+    }
+
+    // Check for existing cards to avoid duplicates
+    const cardsCollection = await getCollection<RedeemCardModel>(
+      COLLECTIONS.REDEEM_CARDS
+    );
+
+    // Generate cards for each redeem code
+    const cardsToInsert: Omit<RedeemCardModel, "_id">[] = [];
+    const generatedCards: Array<{
+      cardNumber: string;
+      amount: number;
+      expiresAt?: string;
+      redeemCodeId: string;
+    }> = [];
+
+    for (const redeemCode of redeemCodes) {
+      if (!redeemCode._id) continue;
+
+      // Check if card already exists for this redeem code
+      const existingCard = await cardsCollection.findOne({
+        redeemCodeId: redeemCode._id,
+      });
+
+      if (existingCard) {
+        // Card already exists, skip
+        continue;
+      }
+
+      // Use the redeem code number as the card number (remove dashes to get 16 digits)
+      // Redeem code format: ####-####-####-####
+      // Card number format: ################ (16 digits, no dashes)
+      const cardNumber = redeemCode.code.replace(/-/g, "");
+
+      // Verify it's exactly 16 digits
+      if (cardNumber.length !== 16 || !/^\d{16}$/.test(cardNumber)) {
+        console.error(`Invalid redeem code format for ${redeemCode._id}: ${redeemCode.code}`);
+        continue;
+      }
+
+      // Check if this card number already exists (shouldn't happen, but safety check)
+      const existingCardNumber = await cardsCollection.findOne({ cardNumber });
+      if (existingCardNumber && existingCardNumber.redeemCodeId.toString() !== redeemCode._id.toString()) {
+        console.error(`Card number ${cardNumber} already exists for a different redeem code`);
+        continue;
+      }
+
+      // Create card
+      const card: Omit<RedeemCardModel, "_id"> = {
+        redeemCodeId: redeemCode._id,
+        cardNumber,
+        amount: redeemCode.amount,
+        expiresAt: redeemCode.expiresAt,
+        createdAt: new Date(),
+        createdBy: new ObjectId(adminUserId),
+      };
+
+      cardsToInsert.push(card);
+      generatedCards.push({
+        cardNumber,
+        amount: redeemCode.amount,
+        expiresAt: redeemCode.expiresAt instanceof Date ? redeemCode.expiresAt.toISOString() : redeemCode.expiresAt,
+        redeemCodeId: redeemCode._id.toString(),
+      });
+    }
+
+    if (cardsToInsert.length === 0) {
+      return {
+        success: false,
+        error: "All selected redeem codes already have cards generated",
+      };
+    }
+
+    // Insert all cards
+    const result = await cardsCollection.insertMany(cardsToInsert);
+
+    return {
+      success: true,
+      message: `Successfully generated ${result.insertedCount} card${result.insertedCount !== 1 ? "s" : ""}`,
+      cards: generatedCards,
+      count: result.insertedCount,
+    };
+  } catch (error) {
+    console.error("Error generating cards:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to generate cards",
+    };
+  }
+}
+
+/**
+ * Get all redeem cards (Admin only)
+ * 
+ * Returns all generated cards sorted by creation date (newest first).
+ * 
+ * @returns Array of redeem cards with serialized data
+ */
+export async function getAllRedeemCards() {
+  try {
+    const collection = await getCollection<RedeemCardModel>(COLLECTIONS.REDEEM_CARDS);
+    const cards = await collection.find({}).sort({ createdAt: -1 }).toArray();
+
+    // Convert MongoDB objects to plain objects for Client Components
+    return cards.map((card) => ({
+      _id: card._id?.toString() || "",
+      redeemCodeId: card.redeemCodeId?.toString() || "",
+      cardNumber: card.cardNumber,
+      amount: card.amount,
+      expiresAt: card.expiresAt instanceof Date ? card.expiresAt.toISOString() : card.expiresAt,
+      createdAt: card.createdAt instanceof Date ? card.createdAt.toISOString() : card.createdAt,
+      createdBy: card.createdBy?.toString(),
+    }));
+  } catch (error) {
+    console.error("Error getting redeem cards:", error);
+    return [];
+  }
+}
+
+/**
+ * Delete redeem card (Admin only)
+ * 
+ * Permanently deletes a redeem card from the database.
+ * 
+ * @param cardId - ID of the card to delete
+ * @param adminUserId - ID of the admin performing the deletion
+ * @returns Success status
+ */
+export async function deleteRedeemCard(cardId: string, adminUserId: string) {
+  try {
+    if (!ObjectId.isValid(cardId)) {
+      return { success: false, error: "Invalid card ID" };
+    }
+
+    if (!ObjectId.isValid(adminUserId)) {
+      return { success: false, error: "Invalid admin user ID" };
+    }
+
+    // Verify admin role
+    const usersCollection = await getCollection<UserModel>(COLLECTIONS.USERS);
+    const admin = await usersCollection.findOne({ _id: new ObjectId(adminUserId) });
+
+    if (!admin || admin.role !== "admin") {
+      return { success: false, error: "Unauthorized: Admin access required" };
+    }
+
+    // Delete card
+    const cardsCollection = await getCollection<RedeemCardModel>(
+      COLLECTIONS.REDEEM_CARDS
+    );
+
+    const result = await cardsCollection.deleteOne({
+      _id: new ObjectId(cardId),
+    });
+
+    if (result.deletedCount === 0) {
+      return { success: false, error: "Card not found" };
+    }
+
+    return {
+      success: true,
+      message: "Card deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting redeem card:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to delete card",
     };
   }
 }

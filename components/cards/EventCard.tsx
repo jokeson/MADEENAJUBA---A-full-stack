@@ -68,7 +68,7 @@ const EventCard = ({
   return (
     <Link
       href={`/events/${id}`}
-      className="group block bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-[#800000]"
+      className="group block bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 hover:border-[#800000] sm:border-b-0 border-b-2 border-b-[#800000]/30 pb-4 sm:pb-0 mb-4 sm:mb-0 last:border-b-0 last:pb-0 last:mb-0"
       tabIndex={0}
       aria-label={`View event: ${title}`}
     >
@@ -116,9 +116,11 @@ const EventCard = ({
       </div>
 
       {/* Content Section Below Image */}
-      <div className="p-4 xs:p-5 sm:p-6">
+      <div 
+        className="p-4 xs:p-5 sm:p-6 bg-gradient-to-r from-[#d6d6c2] to-[#e8d8d0]"
+      >
         {/* Date & Time */}
-        <div className="flex items-center gap-2 text-sm xs:text-base text-gray-600 mb-4 xs:mb-5">
+        <div className="flex items-center gap-2 text-sm xs:text-base text-[#800000] mb-4 xs:mb-5">
           <svg
             className="w-4 h-4 xs:w-5 xs:h-5 text-[#800000] flex-shrink-0"
             fill="none"
@@ -132,12 +134,12 @@ const EventCard = ({
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span className="font-medium">{formatDateTime(startDate)}</span>
+          <span className="font-medium text-[#800000]">{formatDateTime(startDate)}</span>
         </div>
 
         {/* View Details Button */}
-        <div className="pt-3 xs:pt-4 border-t border-gray-200">
-          <span className="inline-flex items-center text-sm xs:text-base font-semibold text-[#800000] group-hover:text-[#900000] transition-colors">
+        <div className="pt-3 xs:pt-4 border-t border-[#800000]/20">
+          <span className="inline-flex items-center text-sm xs:text-base font-semibold text-[#800000] bg-white/80 px-4 py-2 rounded-md hover:bg-white transition-colors group-hover:text-[#900000]">
             View Details
             <svg
               className="ml-2 w-4 h-4 xs:w-5 xs:h-5 transition-transform group-hover:translate-x-1"

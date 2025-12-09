@@ -73,6 +73,17 @@ export interface RedeemCodeModel {
   createdBy: ObjectId; // Admin who created it (issuedByAdminId)
 }
 
+// Redeem Card Model
+export interface RedeemCardModel {
+  _id?: ObjectId;
+  redeemCodeId: ObjectId; // Reference to the redeem code
+  cardNumber: string; // 16-digit card number (e.g., 1234567890123456)
+  amount: number; // Amount in cents (copied from redeem code)
+  expiresAt?: Date; // Expiration date (copied from redeem code)
+  createdAt: Date;
+  createdBy: ObjectId; // Admin who generated the card
+}
+
 // KYC Model
 export interface KycModel {
   _id?: ObjectId;
@@ -255,6 +266,17 @@ export interface UserMessageModel {
   createdAt: Date;
 }
 
+// Password Reset Token Model
+export interface PasswordResetTokenModel {
+  _id?: ObjectId;
+  userId: ObjectId; // User requesting password reset
+  token: string; // Unique reset token
+  expiresAt: Date; // Token expiration time (typically 1 hour)
+  used: boolean; // Whether the token has been used
+  usedAt?: Date; // When the token was used
+  createdAt: Date;
+}
+
 // Collection names constants
 export const COLLECTIONS = {
   USERS: "users",
@@ -273,5 +295,7 @@ export const COLLECTIONS = {
   NOTIFICATIONS: "notifications",
   CONTACT_MESSAGES: "contact_messages",
   USER_MESSAGES: "user_messages",
+  PASSWORD_RESET_TOKENS: "password_reset_tokens",
+  REDEEM_CARDS: "redeem_cards",
 } as const;
 

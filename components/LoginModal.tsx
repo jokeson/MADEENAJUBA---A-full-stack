@@ -7,6 +7,7 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToSignUp?: () => void;
+  onSwitchToForgotPassword?: () => void;
 }
 
 /**
@@ -14,7 +15,7 @@ interface LoginModalProps {
  * A modal dialog component that displays a login form for user authentication.
  * Allows users to sign in with their email and password, and provides an option to switch to sign up.
  */
-const LoginModal = ({ isOpen, onClose, onSwitchToSignUp }: LoginModalProps) => {
+const LoginModal = ({ isOpen, onClose, onSwitchToSignUp, onSwitchToForgotPassword }: LoginModalProps) => {
   // State to control password visibility (show/hide password text)
   const [showPassword, setShowPassword] = useState(false);
   // State to store and display error messages
@@ -100,6 +101,17 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignUp }: LoginModalProps) => {
     onClose();
     if (onSwitchToSignUp) {
       onSwitchToSignUp();
+    }
+  };
+
+  /**
+   * Handles switching from login modal to forgot password modal.
+   * Closes the current login modal and opens the forgot password modal if the callback is provided.
+   */
+  const handleSwitchToForgotPassword = () => {
+    onClose();
+    if (onSwitchToForgotPassword) {
+      onSwitchToForgotPassword();
     }
   };
 
@@ -261,8 +273,15 @@ const LoginModal = ({ isOpen, onClose, onSwitchToSignUp }: LoginModalProps) => {
           <div className="flex justify-end">
             <button
               type="button"
-              className="text-sm text-[#800000] hover:text-[#900000] font-medium"
+              className="text-sm text-[#800000] hover:text-[#900000] font-medium hover:cursor-pointer"
+              onClick={handleSwitchToForgotPassword}
               tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSwitchToForgotPassword();
+                }
+              }}
             >
               Forgot password?
             </button>

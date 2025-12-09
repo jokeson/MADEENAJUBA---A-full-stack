@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatRelativeTime } from "@/lib/format";
 
 interface NewsItem {
   id: string;
@@ -59,13 +59,14 @@ const NewsCard = ({ news, index }: { news: NewsItem; index: number }) => {
 
 
   return (
-    <Link
-      href={`/news/${news.id}`}
-      className="block h-full cursor-pointer group overflow-hidden rounded-lg border border-gray-300 hover:border-gray-300 transition-all duration-300"
-      tabIndex={0}
-      aria-label={`Read more about ${news.title}`}
-      onKeyDown={handleKeyDown}
-    >
+    <div className="sm:border-b-0 border-b-2 border-b-[#800000]/40 pb-4 sm:pb-0 mb-4 sm:mb-0 last:border-b-0 last:pb-0 last:mb-0">
+      <Link
+        href={`/news/${news.id}`}
+        className="block h-full cursor-pointer group overflow-hidden rounded-lg border border-gray-300 hover:border-gray-300 transition-all duration-300"
+        tabIndex={0}
+        aria-label={`Read more about ${news.title}`}
+        onKeyDown={handleKeyDown}
+      >
       <div className="flex flex-col h-full bg-transparent">
         {/* News Image - Full width, no padding */}
         <div className="relative w-full h-48 sm:h-56 lg:h-64 overflow-hidden">
@@ -113,40 +114,29 @@ const NewsCard = ({ news, index }: { news: NewsItem; index: number }) => {
         </div>
 
         {/* Content Section - Padding only on bottom and sides */}
-      <div className="px-3 xs:px-4 sm:px-5 lg:px-6 pt-3 xs:pt-4 pb-3 xs:pb-4 sm:pb-5 lg:pb-6 bg-[#f5f5f0] border border-gray-300 rounded-b-lg shadow-lg">
-          {/* Date and Time */}
-          <div className="flex items-center gap-1.5 xs:gap-2 mb-2 xs:mb-3 text-black text-[10px] xs:text-xs sm:text-sm">
-            <svg
-              className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-black flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-            <span className="text-black truncate">{formatDate(news.datePosted)}</span>
-            <span className="text-black">•</span>
-            <span className="text-black truncate">{news.timePosted}</span>
+      <div 
+        className="px-3 xs:px-4 sm:px-5 lg:px-6 pt-3 xs:pt-4 pb-3 xs:pb-4 sm:pb-5 lg:pb-6 border border-gray-300 rounded-b-lg shadow-lg bg-gradient-to-r from-[#d6d6c2] to-[#e8d8d0]"
+      >
+          {/* Relative Time Label */}
+          <div className="flex items-center gap-1.5 xs:gap-2 mb-2 xs:mb-3">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#800000] text-white text-[10px] xs:text-xs sm:text-sm font-semibold">
+              {formatRelativeTime(news.datePosted)}
+            </span>
           </div>
 
           {/* Title */}
-          <h3 className="text-base xs:text-lg sm:text-xl font-bold text-black mb-2 xs:mb-2.5 leading-tight transition-colors line-clamp-1 break-words">
+          <h3 className="text-base xs:text-lg sm:text-xl font-bold text-[#800000] mb-2 xs:mb-2.5 leading-tight transition-colors line-clamp-1 break-words">
             {news.title}
           </h3>
 
           {/* Description */}
-          <p className="text-black text-[11px] xs:text-xs sm:text-sm mb-3 xs:mb-4 leading-relaxed flex-grow line-clamp-3 break-words">
+          <p className="text-[#800000] text-[11px] xs:text-xs sm:text-sm mb-3 xs:mb-4 leading-relaxed flex-grow line-clamp-3 break-words">
             {news.description}
           </p>
 
           {/* Read More Link - Futuristic style */}
-          <div className="text-black font-medium text-[10px] xs:text-xs sm:text-sm flex items-center gap-1.5 xs:gap-2 mt-auto group-hover:gap-2 xs:group-hover:gap-3 transition-all">
-            <span className="uppercase tracking-wider text-[#800000]">Read More</span>
+          <div className="font-medium text-[10px] xs:text-xs sm:text-sm flex items-center gap-1.5 xs:gap-2 mt-auto group-hover:gap-2 xs:group-hover:gap-3 transition-all">
+            <span className="uppercase tracking-wider text-[#800000] bg-white/80 px-3 py-1.5 rounded-md hover:bg-white transition-colors">Read More</span>
             <svg
               className="w-3 h-3 xs:w-4 xs:h-4 flex-shrink-0"
               fill="none"
@@ -163,7 +153,8 @@ const NewsCard = ({ news, index }: { news: NewsItem; index: number }) => {
           </div>
         </div>
       </div>
-    </Link>
+        </Link>
+    </div>
   );
 };
 

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import NotificationBell from "./NotificationBell";
@@ -73,14 +74,22 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
     <nav ref={menuRef} className="fixed top-0 left-0 right-0 z-50 bg-[#d6d6c2] backdrop-blur-sm py-1 xs:py-2 shadow-md">
       <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 xs:h-16 relative">
-          {/* Logo - Centered on mobile, left-aligned on desktop - Hidden on desktop when signed in */}
-          <div className={`flex-1 md:flex-none flex justify-center md:justify-start items-center ${isAuthenticated ? "md:hidden" : ""}`}>
+          {/* Logo - Centered on mobile, left-aligned on sm, md, lg screens - Always visible */}
+          <div className="flex-1 sm:flex-none flex justify-center sm:justify-start items-center">
             <Link 
               href="/" 
-              className="text-lg xs:text-xl sm:text-xl md:text-2xl font-bold text-[#800000] hover:text-[#800000]/80 transition-colors cursor-pointer break-words"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
               aria-label="Go to home page"
             >
-              MADEENAJUBA
+              <Image
+                src="/logo.png"
+                alt="MADEENAJUBA Logo"
+                width={200}
+                height={110}
+                className="h-10 xs:h-12 sm:h-14 md:h-16 w-auto object-contain"
+                priority
+                unoptimized
+              />
             </Link>
           </div>
 
@@ -256,10 +265,15 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                Madeenajuba
+                <Image
+                  src="/logo.png"
+                  alt="MADEENAJUBA Logo"
+                  width={150}
+                  height={82}
+                  className="h-10 w-auto object-contain flex-shrink-0"
+                  unoptimized
+                />
+                <span className="hidden">Madeenajuba</span>
               </Link>
               <Link 
                 href="/news" 
