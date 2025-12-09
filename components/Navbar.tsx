@@ -135,24 +135,19 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
           {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 absolute left-1/2 transform -translate-x-1/2">
             {(!loading && isMounted ? getVisibleNavItems() : navItems.filter(item => !item.requiresAuth)).map((item) => {
-              const isWalletButton = item.href === "/wallet" && !isAuthenticated && isMounted;
-              
-              if (isWalletButton) {
-                return (
-                  <button
-                    key={item.href}
-                    onClick={onOpenLoginModal}
-                    className="text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors"
-                  >
-                    {item.label}
-                  </button>
-                );
-              }
+              const isWallet = item.href === "/wallet";
+              const shouldInterceptClick = isWallet && !isAuthenticated && !loading && isMounted;
               
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={(e) => {
+                    if (shouldInterceptClick) {
+                      e.preventDefault();
+                      onOpenLoginModal();
+                    }
+                  }}
                   className={`text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive(item.href, item.activePath) ? "border-b-2 border-[#800000]" : ""}`}
                 >
                   {item.label}
@@ -260,31 +255,24 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
               {(!loading && isMounted ? getVisibleNavItems() : navItems.filter(item => !item.requiresAuth)).map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href, item.activePath);
-                const isWalletButton = item.href === "/wallet" && !isAuthenticated && isMounted;
+                const isWallet = item.href === "/wallet";
+                const shouldInterceptClick = isWallet && !isAuthenticated && !loading && isMounted;
                 const baseClasses = `flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${active ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`;
-
-                if (isWalletButton) {
-                  return (
-                    <button
-                      key={item.href}
-                      onClick={() => {
-                        closeMobileMenu();
-                        onOpenLoginModal();
-                      }}
-                      className={`${baseClasses} text-left w-full`}
-                    >
-                      {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-                      {item.label}
-                    </button>
-                  );
-                }
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={baseClasses}
-                    onClick={closeMobileMenu}
+                    onClick={(e) => {
+                      if (shouldInterceptClick) {
+                        e.preventDefault();
+                        closeMobileMenu();
+                        onOpenLoginModal();
+                      } else {
+                        closeMobileMenu();
+                      }
+                    }}
                   >
                     {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
                     {item.label}
