@@ -249,7 +249,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                   className="h-10 w-auto object-contain flex-shrink-0"
                   unoptimized
                 />
-                <span className="hidden">Madeenajuba</span>
+                <span className="hidden">Madeenajuba211</span>
               </Link>
               <Link 
                 href="/news" 
@@ -276,7 +276,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 Jobs
               </Link>
               <Link 
-                href="/ads" 
+                href="/advertisements" 
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/ads") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
                 onClick={closeMobileMenu}
               >
