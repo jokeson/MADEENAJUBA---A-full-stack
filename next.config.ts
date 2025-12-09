@@ -17,34 +17,55 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
       },
     ],
+    // Optimize images for better performance
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Disable static optimization to ensure fresh content on every request
-  // Note: isrMemoryCacheSize is not a valid experimental option in Next.js 16
-  // Disable build cache to ensure fresh builds
-  onDemandEntries: {
-    maxInactiveAge: 0,
-    pagesBufferLength: 0,
-  },
+  // Enable compression
+  compress: true,
+  // Optimize production builds
+  swcMinify: true,
+  // Smart caching strategy
   async headers() {
     return [
+      // Static assets - long cache
+      {
+        source: "/:path*\\.(jpg|jpeg|png|gif|ico|svg|webp|avif|woff|woff2|ttf|eot)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // Next.js static files
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // API routes - no cache for dynamic data
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, max-age=0",
+          },
+        ],
+      },
+      // HTML pages - short cache with revalidation
       {
         source: "/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0",
-          },
-          {
-            key: "Pragma",
-            value: "no-cache",
-          },
-          {
-            key: "Expires",
-            value: "0",
-          },
-          {
-            key: "X-Vercel-Cache",
-            value: "MISS",
+            value: "public, s-maxage=300, stale-while-revalidate=86400",
           },
         ],
       },

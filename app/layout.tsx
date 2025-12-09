@@ -10,36 +10,66 @@ import ToastProvider from "@/components/ToastProvider";
 /**
  * Geist Sans Font Configuration
  * 
- * Configured with preload: false to prevent preload warnings when fonts
- * are not used immediately. The fonts are still loaded when needed.
+ * Preload enabled for better performance and reduced layout shift.
  */
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  preload: false, // Disable preload to prevent warnings when font is not used immediately
+  preload: true, // Enable preload for faster font loading
   display: "swap", // Use swap to prevent invisible text during font load
 });
 
 /**
  * Geist Mono Font Configuration
  * 
- * Configured with preload: false to prevent preload warnings when fonts
- * are not used immediately. The fonts are still loaded when needed.
+ * Preload enabled for better performance and reduced layout shift.
  */
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  preload: false, // Disable preload to prevent warnings when font is not used immediately
+  preload: true, // Enable preload for faster font loading
   display: "swap", // Use swap to prevent invisible text during font load
 });
 
 export const metadata: Metadata = {
-  title: "MADEENAJUBA - City Portal",
+  title: {
+    default: "MADEENAJUBA - City Portal",
+    template: "%s | MADEENAJUBA",
+  },
   description: "MADEENAJUBA is a comprehensive city portal that seamlessly integrates multiple services into a single authenticated web application.",
-  other: {
-    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
-    "Pragma": "no-cache",
-    "Expires": "0",
+  keywords: ["city portal", "e-wallet", "Kilimanjaro", "MADEENAJUBA", "community", "events", "news"],
+  authors: [{ name: "MADEENAJUBA" }],
+  creator: "MADEENAJUBA",
+  publisher: "MADEENAJUBA",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://madeenajuba.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "MADEENAJUBA - City Portal",
+    description: "MADEENAJUBA is a comprehensive city portal that seamlessly integrates multiple services into a single authenticated web application.",
+    siteName: "MADEENAJUBA",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MADEENAJUBA - City Portal",
+    description: "MADEENAJUBA is a comprehensive city portal that seamlessly integrates multiple services into a single authenticated web application.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
