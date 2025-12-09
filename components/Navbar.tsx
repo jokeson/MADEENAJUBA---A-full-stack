@@ -16,12 +16,22 @@ import {
   Megaphone, 
   Building2, 
   Wallet, 
-  LayoutDashboard 
+  LayoutDashboard,
+  LucideIcon
 } from "lucide-react";
 
 interface NavbarProps {
   onOpenLoginModal: () => void;
   onOpenSignUpModal: () => void;
+}
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon?: LucideIcon;
+  requiresAuth?: boolean;
+  showAsButton?: boolean; // Show as button instead of link (e.g., wallet when not authenticated)
+  activePath?: string; // Custom path for active state check
 }
 
 const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
@@ -32,6 +42,30 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
+  // Navigation items configuration
+  const navItems: NavItem[] = [
+    { href: "/", label: "Home" },
+    { href: "/news", label: "News", icon: Newspaper },
+    { href: "/events", label: "Events", icon: Calendar },
+    { href: "/jobs", label: "Jobs", icon: Briefcase },
+    { href: "/about_us", label: "About Us", activePath: "/ads" },
+    { href: "/contact_us", label: "Contact Us", activePath: "/businesses" },
+    { href: "/advertisements", label: "Ads", icon: Megaphone, activePath: "/ads" },
+    { href: "/businesses", label: "Businesses", icon: Building2 },
+    { 
+      href: "/wallet", 
+      label: "Wallet", 
+      icon: Wallet,
+      showAsButton: !isAuthenticated 
+    },
+    { 
+      href: "/dashboard", 
+      label: "Dashboard", 
+      icon: LayoutDashboard,
+      requiresAuth: true 
+    },
+  ];
+
   // Get user initials from email
   const getUserInitials = (email: string): string => {
     if (!email) return "U";
@@ -41,10 +75,19 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
   };
 
   // Check if a navigation link is active
-  const isActive = (href: string): boolean => {
+  const isActive = (href: string, activePath?: string): boolean => {
     if (!pathname) return false;
-    if (href === "/") return pathname === "/";
-    return pathname === href || pathname.startsWith(href + "/");
+    const pathToCheck = activePath || href;
+    if (pathToCheck === "/") return pathname === "/";
+    return pathname === pathToCheck || pathname.startsWith(pathToCheck + "/");
+  };
+
+  // Filter navigation items based on authentication
+  const getVisibleNavItems = (): NavItem[] => {
+    return navItems.filter(item => {
+      if (item.requiresAuth && !isAuthenticated) return false;
+      return true;
+    });
   };
 
   const toggleMobileMenu = () => {
@@ -107,39 +150,28 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Navigation Links - Desktop - Always centered */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 absolute left-1/2 transform -translate-x-1/2">
-            <Link href="/" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/news") ? "border-b-2 border-[#800000]" : ""}`}>
-             Home
-
-            </Link>
-            <Link href="/events" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/events") ? "border-b-2 border-[#800000]" : ""}`}>
-              Events
-            </Link>
-            <Link href="/jobs" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/jobs") ? "border-b-2 border-[#800000]" : ""}`}>
-              Jobs
-            </Link>
-            <Link href="/about_us" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/ads") ? "border-b-2 border-[#800000]" : ""}`}>
-              About Us
-            </Link>
-            <Link href="/contact_us" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/businesses") ? "border-b-2 border-[#800000]" : ""}`}>
-              Contact Us
-            </Link>
-            {isAuthenticated ? (
-              <Link href="/wallet" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/wallet") ? "border-b-2 border-[#800000]" : ""}`}>
-                Wallet
-              </Link>
-            ) : (
-              <button
-                onClick={onOpenLoginModal}
-                className="hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors"
-              >
-                Wallet
-              </button>
-            )}
-            {isAuthenticated && (
-              <Link href="/dashboard" className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive("/dashboard") ? "border-b-2 border-[#800000]" : ""}`}>
-                Dashboard
-              </Link>
-            )}
+            {getVisibleNavItems().map((item) => {
+              if (item.showAsButton) {
+                return (
+                  <button
+                    key={item.href}
+                    onClick={onOpenLoginModal}
+                    className="hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors"
+                  >
+                    {item.label}
+                  </button>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive(item.href, item.activePath) ? "border-b-2 border-[#800000]" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right Side - Action Buttons or Profile Avatar */}
@@ -236,6 +268,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
           <div>
           <div className="border-t border-gray-200 w-full pl-4 sm:pl-6 lg:pl-8 pt-4 pr-0 pb-0">
             <div className="flex flex-col gap-2">
+              {/* Logo Link */}
               <Link 
                 href="/" 
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
@@ -251,77 +284,41 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 />
                 <span className="hidden">Madeenajuba211</span>
               </Link>
-              <Link 
-                href="/news" 
-                className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/news") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
-                onClick={closeMobileMenu}
-              >
-                <Newspaper className="w-5 h-5 flex-shrink-0" />
-                News
-              </Link>
-              <Link 
-                href="/events" 
-                className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/events") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
-                onClick={closeMobileMenu}
-              >
-                <Calendar className="w-5 h-5 flex-shrink-0" />
-                Events
-              </Link>
-              <Link 
-                href="/jobs" 
-                className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/jobs") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
-                onClick={closeMobileMenu}
-              >
-                <Briefcase className="w-5 h-5 flex-shrink-0" />
-                Jobs
-              </Link>
-              <Link 
-                href="/advertisements" 
-                className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/ads") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
-                onClick={closeMobileMenu}
-              >
-                <Megaphone className="w-5 h-5 flex-shrink-0" />
-                Ads
-              </Link>
-              <Link 
-                href="/businesses" 
-                className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/businesses") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
-                onClick={closeMobileMenu}
-              >
-                <Building2 className="w-5 h-5 flex-shrink-0" />
-                Businesses
-              </Link>
-              {isAuthenticated ? (
-                <>
-                  <Link 
-                    href="/wallet" 
-                    className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/wallet") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
+              
+              {/* Navigation Links */}
+              {getVisibleNavItems().map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.href, item.activePath);
+                const baseClasses = `flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${active ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`;
+
+                if (item.showAsButton) {
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => {
+                        closeMobileMenu();
+                        onOpenLoginModal();
+                      }}
+                      className={`${baseClasses} text-left w-full`}
+                    >
+                      {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+                      {item.label}
+                    </button>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={baseClasses}
                     onClick={closeMobileMenu}
                   >
-                    <Wallet className="w-5 h-5 flex-shrink-0" />
-                    Wallet
+                    {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+                    {item.label}
                   </Link>
-                  <Link 
-                    href="/dashboard" 
-                    className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/dashboard") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
-                    onClick={closeMobileMenu}
-                  >
-                    <LayoutDashboard className="w-5 h-5 flex-shrink-0" />
-                    Dashboard
-                  </Link>
-                </>
-              ) : (
-                <button
-                  onClick={() => {
-                    closeMobileMenu();
-                    onOpenLoginModal();
-                  }}
-                  className="flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg text-left w-full"
-                >
-                  <Wallet className="w-5 h-5 flex-shrink-0" />
-                  Wallet
-                </button>
-              )}
+                );
+              })}
               
               {/* Sign in and Sign up buttons - Mobile - Only shown when not authenticated */}
               {!isAuthenticated && (
