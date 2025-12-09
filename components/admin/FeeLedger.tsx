@@ -192,7 +192,7 @@ const FeeLedger = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 h-full flex flex-col overflow-hidden">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-xl font-semibold text-[#800000]">Fee Ledger</h3>

@@ -86,7 +86,7 @@ const AdminTabContent = ({ activeTab, onKycNotificationRefresh, onEventNotificat
   };
 
   return (
-    <div className="mt-4 sm:mt-6" role="tabpanel">
+    <div className="h-full overflow-y-auto overflow-x-hidden" role="tabpanel">
       {renderTabContent()}
     </div>
   );

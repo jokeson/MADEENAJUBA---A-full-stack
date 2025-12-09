@@ -166,8 +166,8 @@ const RedeemGeneratorForm = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-semibold text-[#800000] mb-6">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 h-full flex flex-col overflow-hidden">
+      <h3 className="text-xl font-semibold text-[#800000] mb-4 sm:mb-6 flex-shrink-0">
         Redeem Code Generator
       </h3>
 

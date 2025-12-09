@@ -307,8 +307,8 @@ const Statistics = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-semibold text-[#800000] mb-6">Platform Statistics</h3>
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 h-full flex flex-col overflow-hidden">
+        <h3 className="text-xl font-semibold text-[#800000] mb-4 sm:mb-6 flex-shrink-0">Platform Statistics</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {statCards.map((card, index) => {

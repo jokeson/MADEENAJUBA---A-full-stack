@@ -224,8 +224,8 @@ const UserTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 h-full flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <h3 className="text-xl font-semibold text-[#800000]">User Management</h3>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
           {/* Search Input */}
@@ -252,32 +252,35 @@ const UserTable = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-          {error}
-        </div>
-      )}
+      <div className="flex-shrink-0">
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+            {error}
+          </div>
+        )}
 
-      {success && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
-          {success}
-        </div>
-      )}
+        {success && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
+            {success}
+          </div>
+        )}
+      </div>
 
-      {users.length === 0 ? (
-        <div className="text-center py-8 text-[#800000]">
-          No users found. Create a user account to get started.
-        </div>
-      ) : filteredUsers.length === 0 ? (
-        <div className="text-center py-8 text-[#800000]">
-          <p className="mb-2">No users found matching your search.</p>
-          <p className="text-sm">
-            Try searching with a different email or ID.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="overflow-x-auto">
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+        {users.length === 0 ? (
+          <div className="text-center py-8 text-[#800000]">
+            No users found. Create a user account to get started.
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="text-center py-8 text-[#800000]">
+            <p className="mb-2">No users found matching your search.</p>
+            <p className="text-sm">
+              Try searching with a different email or ID.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 overflow-x-auto overflow-y-auto min-h-0">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -438,8 +441,10 @@ const UserTable = () => {
               </div>
             </div>
           )}
-        </>
-      )}
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal

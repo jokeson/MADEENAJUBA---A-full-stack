@@ -55,9 +55,9 @@ const AdminTabNavigation = ({
   };
 
   return (
-    <div className="mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto -mx-3 sm:-mx-4 md:-mx-6 lg:-mx-8 px-3 sm:px-4 md:px-6 lg:px-8">
+    <div className="border-b border-gray-200 overflow-x-auto overflow-y-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
       <nav
-        className="flex space-x-4 sm:space-x-6 md:space-x-8 min-w-max sm:min-w-0"
+        className="flex space-x-2 sm:space-x-4 md:space-x-6 min-w-max"
         aria-label="Admin Dashboard Tabs"
       >
         {tabs.map((tab) => {
@@ -69,7 +69,7 @@ const AdminTabNavigation = ({
               onClick={() => handleTabClick(tab.id)}
               onKeyDown={(e) => handleKeyDown(e, tab.id)}
               className={`
-                flex items-center gap-1 sm:gap-2 py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap
+                flex items-center gap-1 sm:gap-2 py-2 sm:py-3 px-2 sm:px-3 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap flex-shrink-0
                 ${
                   isActive
                     ? "border-blue-500 text-blue-600"
@@ -82,7 +82,7 @@ const AdminTabNavigation = ({
               role="tab"
             >
               {/* Tab Icon */}
-              <span className="text-base sm:text-lg relative" aria-hidden="true">
+              <span className="text-sm sm:text-base relative flex-shrink-0" aria-hidden="true">
                 {tab.icon}
                 {/* Notification Badge - Red circle showing unviewed items */}
                 {notificationCounts[tab.id] && notificationCounts[tab.id]! > 0 && (
@@ -93,7 +93,7 @@ const AdminTabNavigation = ({
                 )}
               </span>
               {/* Tab Label */}
-              <span>{tab.label}</span>
+              <span className="flex-shrink-0">{tab.label}</span>
             </button>
           );
         })}

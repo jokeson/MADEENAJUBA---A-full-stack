@@ -13,7 +13,7 @@
 
 const AdminPageHeader = () => {
   return (
-    <div className="mb-6 sm:mb-8">
+    <div className="flex-shrink-0">
       <div className="flex-1">
         <p className="text-sm sm:text-base text-[#800000]">
           Manage users, wallets, fees, and KYC applications

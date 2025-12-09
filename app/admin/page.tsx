@@ -129,33 +129,39 @@ const AdminPage = () => {
    *   - Tab Content: Dynamically rendered component based on active tab
    */
   return (
-    <div className="min-h-screen bg-[#f5f5f0] flex">
+    <div className="h-screen bg-[#f5f5f0] flex overflow-hidden">
       {/* Sidebar Navigation */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 w-full md:ml-56 lg:ml-56 xl:ml-60">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-4 xs:py-5 sm:py-6 md:py-8 lg:py-10 xl:py-12">
+      <div className="flex-1 w-full md:ml-56 lg:ml-56 xl:ml-60 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden max-w-7xl mx-auto w-full px-3 xs:px-4 sm:px-5 md:px-6 lg:px-8 py-4 xs:py-4 sm:py-5 md:py-6 lg:py-6">
           {/* Page Header */}
-          <AdminPageHeader />
+          <div className="flex-shrink-0 mb-3 sm:mb-4">
+            <AdminPageHeader />
+          </div>
 
           {/* Tab Navigation */}
-          <AdminTabNavigation
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            tabs={ADMIN_TABS}
-            notificationCounts={{
-              kyc: kycUnviewedCount > 0 ? kycUnviewedCount : undefined,
-              permission: eventPendingCount > 0 ? eventPendingCount : undefined,
-            }}
-          />
+          <div className="flex-shrink-0 mb-3 sm:mb-4">
+            <AdminTabNavigation
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              tabs={ADMIN_TABS}
+              notificationCounts={{
+                kyc: kycUnviewedCount > 0 ? kycUnviewedCount : undefined,
+                permission: eventPendingCount > 0 ? eventPendingCount : undefined,
+              }}
+            />
+          </div>
 
           {/* Tab Content - Renders the appropriate component based on active tab */}
-          <AdminTabContent 
-            activeTab={activeTab} 
-            onKycNotificationRefresh={refreshKycNotifications}
-            onEventNotificationRefresh={refreshEventNotifications}
-          />
+          <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
+            <AdminTabContent 
+              activeTab={activeTab} 
+              onKycNotificationRefresh={refreshKycNotifications}
+              onEventNotificationRefresh={refreshEventNotifications}
+            />
+          </div>
         </div>
       </div>
     </div>
