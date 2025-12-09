@@ -30,8 +30,7 @@ interface NavItem {
   label: string;
   icon?: LucideIcon;
   requiresAuth?: boolean;
-  showAsButton?: boolean; // Show as button instead of link (e.g., wallet when not authenticated)
-  activePath?: string; // Custom path for active state check
+  activePath?: string;
 }
 
 const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
@@ -52,18 +51,8 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
     { href: "/contact_us", label: "Contact Us", activePath: "/businesses" },
     { href: "/advertisements", label: "Ads", icon: Megaphone, activePath: "/ads" },
     { href: "/businesses", label: "Businesses", icon: Building2 },
-    { 
-      href: "/wallet", 
-      label: "Wallet", 
-      icon: Wallet,
-      showAsButton: !isAuthenticated 
-    },
-    { 
-      href: "/dashboard", 
-      label: "Dashboard", 
-      icon: LayoutDashboard,
-      requiresAuth: true 
-    },
+    { href: "/wallet", label: "Wallet", icon: Wallet },
+    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiresAuth: true },
   ];
 
   // Get user initials from email
@@ -74,7 +63,6 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
     return (emailPart[0] + emailPart[emailPart.length - 1]).toUpperCase();
   };
 
-  // Check if a navigation link is active
   const isActive = (href: string, activePath?: string): boolean => {
     if (!pathname) return false;
     const pathToCheck = activePath || href;
@@ -82,21 +70,11 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
     return pathname === pathToCheck || pathname.startsWith(pathToCheck + "/");
   };
 
-  // Filter navigation items based on authentication
   const getVisibleNavItems = (): NavItem[] => {
-    return navItems.filter(item => {
-      if (item.requiresAuth && !isAuthenticated) return false;
-      return true;
-    });
+    return navItems.filter(item => !item.requiresAuth || isAuthenticated);
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen((prev) => !prev);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -148,25 +126,28 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
             </Link>
           </div>
 
-          {/* Navigation Links - Desktop - Always centered */}
+          {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 absolute left-1/2 transform -translate-x-1/2">
             {getVisibleNavItems().map((item) => {
-              if (item.showAsButton) {
+              const isWalletButton = item.href === "/wallet" && !isAuthenticated;
+              
+              if (isWalletButton) {
                 return (
                   <button
                     key={item.href}
                     onClick={onOpenLoginModal}
-                    className="hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors"
+                    className="text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors"
                   >
                     {item.label}
                   </button>
                 );
               }
+              
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`hover:cursor-pointer text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive(item.href, item.activePath) ? "border-b-2 border-[#800000]" : ""}`}
+                  className={`text-[#800000] text-sm md:text-base font-medium hover:text-[#800000]/80 transition-colors ${isActive(item.href, item.activePath) ? "border-b-2 border-[#800000]" : ""}`}
                 >
                   {item.label}
                 </Link>
@@ -176,44 +157,41 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Right Side - Action Buttons or Profile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-            {/* Notification Bell - Only shown when authenticated - Hidden on mobile */}
-            {isAuthenticated && <div className="hidden md:block"><NotificationBell /></div>}
+            {isAuthenticated && (
+              <div className="hidden md:block">
+                <NotificationBell />
+              </div>
+            )}
 
-            {/* Action Buttons - Desktop - Hidden when authenticated */}
             {!isAuthenticated && (
               <div className="hidden lg:flex items-center gap-2 pb-2 sm:gap-4">
                 <button
                   onClick={onOpenLoginModal}
-                  className="px-3 hover:cursor-pointer sm:px-4 py-2 text-xs sm:text-sm font-medium text-white border border-[#800000] hover:bg-white/10 transition-colors whitespace-nowrap"
-                  tabIndex={0}
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white border border-[#800000] hover:bg-white/10 transition-colors whitespace-nowrap"
                   aria-label="Sign in"
                 >
                   <span className="hidden md:block">Sign in</span>
                 </button>
                 <button
                   onClick={onOpenSignUpModal}
-                  className="px-3 hover:cursor-pointer sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-[#800000] hover:bg-[#900000] transition-colors whitespace-nowrap"
-                  tabIndex={0}
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-[#800000] hover:bg-[#900000] transition-colors whitespace-nowrap"
                   aria-label="Sign up"
                 >
-                  <span className="hidden md:block text-white">Sign up</span>
+                  <span className="hidden md:block">Sign up</span>
                 </button>
               </div>
             )}
 
-            {/* Profile Avatar - Desktop - Only shown when authenticated */}
             {isAuthenticated && user && (
               <div className="hidden lg:block relative ml-auto" ref={profileMenuRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                  className="w-10 h-10 rounded-full bg-[#800000] text-white font-semibold text-sm flex items-center justify-center hover:bg-[#800000]/90 transition-colors focus:outline-none focus:ring-2 focus:ring-[#800000] focus:ring-offset-2 focus:ring-offset-[#0a1629]"
-                  tabIndex={0}
+                  className="w-10 h-10 rounded-full bg-[#800000] text-white font-semibold text-sm flex items-center justify-center hover:bg-[#800000]/90 transition-colors focus:outline-none focus:ring-2 focus:ring-[#800000] focus:ring-offset-2"
                   aria-label="User profile menu"
                 >
                   {getUserInitials(user.email)}
                 </button>
                 
-                {/* Profile Dropdown Menu */}
                 {isProfileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
                     <div className="px-4 py-3 border-b border-gray-200">
@@ -226,7 +204,6 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                         signOut();
                       }}
                       className="w-full flex items-center gap-2 px-4 py-2 text-base font-semibold text-red-500 hover:bg-red-50 transition-colors"
-                      tabIndex={0}
                       aria-label="Sign out"
                     >
                       <LogOut className="w-4 h-4 flex-shrink-0 text-red-500" />
@@ -238,21 +215,15 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
             )}
           </div>
 
-          {/* Mobile Menu Button and Notification Bell - Visible only on mobile */}
+          {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2 absolute right-0">
-            {/* Notification Bell - Only shown when authenticated on mobile */}
             {isAuthenticated && <NotificationBell />}
             <button
-              onClick={toggleMobileMenu}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-[#663300] hover:bg-white/10 rounded-lg transition-colors"
               aria-label="Toggle menu"
-              tabIndex={0}
             >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -260,15 +231,11 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
         {/* Mobile Menu */}
         <div
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out w-full -mx-4 sm:-mx-6 lg:-mx-8 ${
-            isMobileMenuOpen
-              ? "max-h-[800px] opacity-100"
-              : "max-h-0 opacity-0"
+            isMobileMenuOpen ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          <div>
           <div className="border-t border-gray-200 w-full pl-4 sm:pl-6 lg:pl-8 pt-4 pr-0 pb-0">
             <div className="flex flex-col gap-2">
-              {/* Logo Link */}
               <Link 
                 href="/" 
                 className={`flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${isActive("/") ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`} 
@@ -282,16 +249,15 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                   className="h-10 w-auto object-contain flex-shrink-0"
                   unoptimized
                 />
-                <span className="hidden">Madeenajuba211</span>
               </Link>
               
-              {/* Navigation Links */}
               {getVisibleNavItems().map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href, item.activePath);
+                const isWalletButton = item.href === "/wallet" && !isAuthenticated;
                 const baseClasses = `flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${active ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`;
 
-                if (item.showAsButton) {
+                if (isWalletButton) {
                   return (
                     <button
                       key={item.href}
@@ -320,7 +286,6 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 );
               })}
               
-              {/* Sign in and Sign up buttons - Mobile - Only shown when not authenticated */}
               {!isAuthenticated && (
                 <div className="flex flex-row gap-3 pt-4 pb-4 border-t border-gray-200 px-3">
                   <button
@@ -329,7 +294,6 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                       onOpenLoginModal();
                     }}
                     className="flex-1 px-4 py-3 text-sm font-medium text-[#800000] border-2 border-[#800000] hover:bg-[#800000] hover:text-white transition-colors rounded-lg"
-                    tabIndex={0}
                     aria-label="Sign in"
                   >
                     Sign in
@@ -340,17 +304,14 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                       onOpenSignUpModal();
                     }}
                     className="flex-1 px-4 py-3 text-sm font-medium text-white bg-[#800000] hover:bg-[#6b0000] transition-colors rounded-lg"
-                    tabIndex={0}
                     aria-label="Sign up"
                   >
                     Sign up
                   </button>
                 </div>
               )}
-
             </div>
           </div>
-        </div>
         </div>
       </div>
     </nav>
