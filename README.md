@@ -691,3 +691,4 @@ const users = await getCollection<UserModel>(COLLECTIONS.USERS);
 import { getUserByEmail, createUser } from "@/lib/db/utils";
 const user = await getUserByEmail("user@example.com");
 ```# MADEENAJUBA---A-full-stack
+# MADEENAJUBA---A-full-stack
