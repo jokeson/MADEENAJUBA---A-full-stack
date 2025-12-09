@@ -441,7 +441,6 @@ const UserTable = () => {
               </div>
             </div>
           )}
-            </div>
           </>
         )}
       </div>
