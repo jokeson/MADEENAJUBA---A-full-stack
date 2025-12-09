@@ -19,10 +19,7 @@ const nextConfig: NextConfig = {
     ],
   },
   // Disable static optimization to ensure fresh content on every request
-  experimental: {
-    // Force dynamic rendering for all routes
-    isrMemoryCacheSize: 0,
-  },
+  // Note: isrMemoryCacheSize is not a valid experimental option in Next.js 16
   // Disable build cache to ensure fresh builds
   onDemandEntries: {
     maxInactiveAge: 0,

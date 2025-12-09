@@ -448,11 +448,7 @@ const RedeemGeneratorForm = () => {
 
                       if (result.success) {
                         setSuccess(result.message || "Cards generated successfully");
-                        // Reload cards when switching to Cards tab
-                        if (activeTab === "cards") {
-                          const cards = await getAllRedeemCards();
-                          setRedeemCards(cards);
-                        }
+                        // Cards will be reloaded when user switches to Cards tab
                         setTimeout(() => setSuccess(""), 5000);
                       } else {
                         setError(result.error || "Failed to generate cards");

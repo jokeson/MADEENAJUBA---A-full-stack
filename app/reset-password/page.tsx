@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { verifyPasswordResetToken, resetPassword } from "@/lib/server-actions/auth";
 import toast from "react-hot-toast";
 
 /**
- * Reset Password Page
- * Allows users to reset their password using a token from the email link.
+ * Reset Password Content Component
+ * Handles the actual reset password logic with search params
  */
-const ResetPasswordPage = () => {
+const ResetPasswordContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -337,6 +337,30 @@ const ResetPasswordPage = () => {
         </p>
       </div>
     </div>
+  );
+};
+
+/**
+ * Reset Password Page
+ * Allows users to reset their password using a token from the email link.
+ * Wrapped in Suspense to handle useSearchParams() properly.
+ */
+const ResetPasswordPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#d6d6c2] px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#800000]"></div>
+              <p className="mt-4 text-[#800000]">Loading...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
   );
 };
 
