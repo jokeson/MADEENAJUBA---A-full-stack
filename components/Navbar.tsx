@@ -34,12 +34,18 @@ interface NavItem {
 }
 
 const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
-  const { isAuthenticated, user, signOut } = useAuth();
+  const { isAuthenticated, user, signOut, loading } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Prevent hydration mismatch by only rendering auth-dependent content after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Navigation items configuration
   const navItems: NavItem[] = [
@@ -128,8 +134,8 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Navigation Links - Desktop */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 absolute left-1/2 transform -translate-x-1/2">
-            {getVisibleNavItems().map((item) => {
-              const isWalletButton = item.href === "/wallet" && !isAuthenticated;
+            {(!loading && isMounted ? getVisibleNavItems() : navItems.filter(item => !item.requiresAuth)).map((item) => {
+              const isWalletButton = item.href === "/wallet" && !isAuthenticated && isMounted;
               
               if (isWalletButton) {
                 return (
@@ -157,32 +163,32 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Right Side - Action Buttons or Profile Avatar */}
           <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-            {isAuthenticated && (
+            {!loading && isAuthenticated && isMounted && (
               <div className="hidden md:block">
                 <NotificationBell />
               </div>
             )}
 
-            {!isAuthenticated && (
+            {!loading && !isAuthenticated && isMounted && (
               <div className="hidden lg:flex items-center gap-2 pb-2 sm:gap-4">
                 <button
                   onClick={onOpenLoginModal}
-                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white border border-[#800000] hover:bg-white/10 transition-colors whitespace-nowrap"
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white border border-[#800000] hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer rounded-lg"
                   aria-label="Sign in"
                 >
-                  <span className="hidden md:block">Sign in</span>
+                  <span className="hidden md:block text-[#800000]">Sign in</span>
                 </button>
                 <button
                   onClick={onOpenSignUpModal}
-                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-[#800000] hover:bg-[#900000] transition-colors whitespace-nowrap"
+                  className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-[#800000] hover:bg-[#900000] transition-colors whitespace-nowrap cursor-pointer rounded-lg"
                   aria-label="Sign up"
                 >
-                  <span className="hidden md:block">Sign up</span>
+                  <span className="hidden md:block text-white">Sign up</span>
                 </button>
               </div>
             )}
 
-            {isAuthenticated && user && (
+            {!loading && isAuthenticated && user && isMounted && (
               <div className="hidden lg:block relative ml-auto" ref={profileMenuRef}>
                 <button
                   onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
@@ -217,7 +223,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2 absolute right-0">
-            {isAuthenticated && <NotificationBell />}
+            {!loading && isAuthenticated && isMounted && <NotificationBell />}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-[#663300] hover:bg-white/10 rounded-lg transition-colors"
@@ -251,10 +257,10 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 />
               </Link>
               
-              {getVisibleNavItems().map((item) => {
+              {(!loading && isMounted ? getVisibleNavItems() : navItems.filter(item => !item.requiresAuth)).map((item) => {
                 const Icon = item.icon;
                 const active = isActive(item.href, item.activePath);
-                const isWalletButton = item.href === "/wallet" && !isAuthenticated;
+                const isWalletButton = item.href === "/wallet" && !isAuthenticated && isMounted;
                 const baseClasses = `flex items-center gap-3 text-[#800000] text-base font-medium hover:bg-gray-50 transition-colors py-3 px-3 rounded-lg ${active ? "bg-gray-50 border-l-4 border-[#800000]" : ""}`;
 
                 if (isWalletButton) {
@@ -286,7 +292,7 @@ const Navbar = ({ onOpenLoginModal, onOpenSignUpModal }: NavbarProps) => {
                 );
               })}
               
-              {!isAuthenticated && (
+              {!loading && !isAuthenticated && isMounted && (
                 <div className="flex flex-row gap-3 pt-4 pb-4 border-t border-gray-200 px-3">
                   <button
                     onClick={() => {
